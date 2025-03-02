@@ -44,7 +44,7 @@ export function LayoutProvider({ children }) {
   const handleTypeChange = (
     newTypeFilterKeys: string[],
   ): { name: string; active: boolean }[] => {
-    if (newTypeFilterKeys.length === 0) {
+    if (newTypeFilterKeys.length === 0 || newTypeFilterKeys.length === 2) {
       return [...defaults["/chart"]["type"]];
     }
 
@@ -54,7 +54,7 @@ export function LayoutProvider({ children }) {
 
     return current.map((item) => ({
       name: item.name,
-      active: newTypeFilterKeys.includes(item.name),
+      active: !newTypeFilterKeys.includes(item.name),
     }));
   };
 
