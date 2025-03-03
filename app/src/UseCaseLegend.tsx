@@ -1,4 +1,4 @@
-import { Grid, Tooltip } from "@mui/material";
+import { Grid, Paper, Tooltip } from "@mui/material";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Stack } from "@mui/system";
 import { faKeySkeleton } from "@fortawesome/pro-light-svg-icons/faKeySkeleton";
@@ -30,8 +30,8 @@ const elements: {
     color: null,
     tooltip: null,
   },
-  smartcard: {
-    name: "SmartCard",
+  digital_security: {
+    name: "Digital Security",
     icon: <FontAwesomeIcon size="xl" icon={faBinaryLock} />,
     color: null,
     tooltip: null,
@@ -86,7 +86,8 @@ const UseCaseLegend = ({ props }: { props?: { name?: string } }) => {
     featureMap["blink"]["tooltip"] = "Doesn't have an LED";
     featureMap["magic"]["tooltip"] = "Doesn't Support Cloning";
     featureMap["data_sharing"]["tooltip"] = "Can't Share Data";
-    featureMap["smartcard"]["tooltip"] = "Doesn't Offer Digital Security";
+    featureMap["digital_security"]["tooltip"] =
+      "Doesn't Offer Digital Security";
     featureMap["payment"]["tooltip"] = "Doesn't Support Payment";
     featureMap["temperature"]["tooltip"] = "Can't Take Temperature";
 
@@ -113,12 +114,23 @@ const UseCaseLegend = ({ props }: { props?: { name?: string } }) => {
       } else if (feature.feature === "Temperature") {
         featureMap["temperature"]["color"] = "white";
         featureMap["temperature"]["tooltip"] = "Can Take Temperature";
+      } else if (feature.feature === "Digital Security") {
+        featureMap["digital_security"]["color"] = "white";
+        featureMap["digital_security"]["tooltip"] =
+          "Has Digital Security Features";
       }
     });
     return (
       <Grid
+        component={Paper}
         container
-        sx={{ flex: 1, flexDirection: "row", justifyContent: "space-evenly" }}
+        sx={{
+          flex: 1,
+          flexDirection: "row",
+          justifyContent: "space-evenly",
+          p: "1rem",
+          borderRadius: 3,
+        }}
       >
         {Object.keys(featureMap).map((e, i) => (
           <Tooltip key={i} title={featureMap[e].tooltip}>
