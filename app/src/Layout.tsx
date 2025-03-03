@@ -19,6 +19,7 @@ import {
   Paper,
   FormControl,
   InputLabel,
+  IconButton,
 } from "@mui/material";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
@@ -32,6 +33,9 @@ import { defaults } from "./LayoutContext";
 import theme from "~/src/theme";
 import { faChartSimpleHorizontal } from "@fortawesome/pro-regular-svg-icons/faChartSimpleHorizontal";
 import { faMagnifyingGlass } from "@fortawesome/pro-regular-svg-icons/faMagnifyingGlass";
+import { faMagnet } from "@fortawesome/pro-light-svg-icons/faMagnet";
+import { faMicrochip } from "@fortawesome/pro-light-svg-icons/faMicrochip";
+import UseCaseLegend from "~/src/UseCaseLegend";
 
 const navItems = [
   // { name: "About", route: "/about" },
@@ -134,11 +138,26 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     </Box>
   );
 
+  const typeFilterIconMap = {
+    chip: <FontAwesomeIcon size={"sm"} icon={faMicrochip} />,
+    magnet: <FontAwesomeIcon size={"sm"} icon={faMagnet} />,
+  };
+
   const FilterComponent = () => {
     switch (location.pathname) {
       case "/chart":
         return (
-          <Grid container sx={{ flexDirection: "row", flex: 1 }}>
+          <Grid container sx={{ flexDirection: "row", flex: 1 }} spacing={2}>
+            {filters["/chart"]["type"].filter((e) => e.active).length === 1 &&
+            filters["/chart"]["type"].some(
+              (e) => e.name === "chips" && e.active,
+            ) ? (
+              <Box alignContent={"center"} flexGrow={2}>
+                <UseCaseLegend />
+              </Box>
+            ) : (
+              ""
+            )}
             <Box>
               <FormControl sx={{ m: 1, width: 200 }} size={"small"}>
                 <InputLabel id="type-filter-label">Type</InputLabel>
@@ -175,8 +194,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 </Select>
               </FormControl>
             </Box>
-            <Grid container alignItems={"center"} pl={2}>
-              <FontAwesomeIcon icon={faCalendar} size={"xl"} />
+            <Grid container alignItems={"center"}>
               <FormControl sx={{ m: 1, width: 200 }} size={"small"}>
                 <InputLabel id="type-filter-label">Period</InputLabel>
                 <Select

@@ -278,7 +278,7 @@ const Chart = () => {
               backgroundColor: theme.palette.action.selected,
             }}
           >
-            {mod.mod_type.toLowerCase() === "chip" ? (
+            {["chip", "xled"].includes(mod.mod_type.toLowerCase()) ? (
               <TableRow>
                 <TableCell colSpan={2}>
                   <UseCaseLegend props={{ name: mod.name }} />

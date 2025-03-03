@@ -297,6 +297,8 @@ export class ChipImplant extends Mod implements ChipImplantInterface {
     );
   }
 
+  // TODO: Add other things from the legend... Currently, smartphone/legacy access control is inferred from frequency...
+  //  Which is imperfect because of pet chips
   get summary(): SummaryLine[] {
     const lines: SummaryLine[] = [];
 

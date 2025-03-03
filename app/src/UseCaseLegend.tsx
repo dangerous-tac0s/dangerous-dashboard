@@ -7,66 +7,13 @@ import { faLightbulb } from "@fortawesome/pro-light-svg-icons/faLightbulb";
 import { faCopy } from "@fortawesome/pro-light-svg-icons/faCopy";
 import { faCreditCard } from "@fortawesome/pro-light-svg-icons/faCreditCard";
 import { faMobileSignal } from "@fortawesome/pro-light-svg-icons/faMobileSignal";
-import { CHIP_IMPLANT_MAP } from "~/models/chip_implant";
+import {
+  CHIP_IMPLANT_MAP,
+  ChipImplant,
+  ChipImplantInterface,
+} from "~/models/chip_implant";
 import { faThermometer } from "@fortawesome/pro-light-svg-icons/faThermometer";
-
-const elements: {
-  [key: string]: {
-    name: string;
-    icon: any;
-    color: null | string;
-    tooltip: null | string;
-  };
-} = {
-  hf: {
-    name: "HF",
-    icon: <FontAwesomeIcon size="xl" icon={faMobileSignal} />,
-    color: null,
-    tooltip: null,
-  },
-  lf: {
-    name: "LF",
-    icon: <FontAwesomeIcon size="xl" icon={faKeySkeleton} />,
-    color: null,
-    tooltip: null,
-  },
-  digital_security: {
-    name: "Digital Security",
-    icon: <FontAwesomeIcon size="xl" icon={faBinaryLock} />,
-    color: null,
-    tooltip: null,
-  },
-  data_sharing: {
-    name: "Data Sharing",
-    icon: <FontAwesomeIcon size="xl" icon={faCopy} />,
-    color: null,
-    tooltip: null,
-  },
-  payment: {
-    name: "Payment",
-    icon: <FontAwesomeIcon size="xl" icon={faCreditCard} />,
-    color: null,
-    tooltip: null,
-  },
-  magic: {
-    name: "Magic",
-    icon: <FontAwesomeIcon size="xl" icon={faCopy} />,
-    color: null,
-    tooltip: null,
-  },
-  blink: {
-    name: "Blink",
-    icon: <FontAwesomeIcon size="xl" icon={faLightbulb} />,
-    color: null,
-    tooltip: null,
-  },
-  temperature: {
-    name: "Temperature",
-    icon: <FontAwesomeIcon size="xl" icon={faThermometer} />,
-    color: null,
-    tooltip: null,
-  },
-};
+import { faShareFromSquare } from "@fortawesome/pro-light-svg-icons/faShareFromSquare";
 
 const UseCaseLegend = ({ props }: { props?: { name?: string } }) => {
   let mod = null;
@@ -74,9 +21,65 @@ const UseCaseLegend = ({ props }: { props?: { name?: string } }) => {
     const { name } = props;
     if (name && Object.keys(CHIP_IMPLANT_MAP).includes(name)) {
       mod = CHIP_IMPLANT_MAP[name]();
-      console.log(mod.summary);
     }
   }
+  const elements: {
+    [key: string]: {
+      name: string;
+      icon: any;
+      color: null | string;
+      tooltip: null | string;
+    };
+  } = {
+    hf: {
+      name: "HF",
+      icon: <FontAwesomeIcon size="xl" icon={faMobileSignal} />,
+      color: null,
+      tooltip: null,
+    },
+    lf: {
+      name: "LF",
+      icon: <FontAwesomeIcon size="xl" icon={faKeySkeleton} />,
+      color: null,
+      tooltip: null,
+    },
+    digital_security: {
+      name: "Digital Security",
+      icon: <FontAwesomeIcon size="xl" icon={faBinaryLock} />,
+      color: null,
+      tooltip: null,
+    },
+    data_sharing: {
+      name: "Data Sharing",
+      icon: <FontAwesomeIcon size="xl" icon={faShareFromSquare} />,
+      color: null,
+      tooltip: null,
+    },
+    payment: {
+      name: "Payment",
+      icon: <FontAwesomeIcon size="xl" icon={faCreditCard} />,
+      color: null,
+      tooltip: null,
+    },
+    magic: {
+      name: "Magic",
+      icon: <FontAwesomeIcon size="xl" icon={faCopy} />,
+      color: null,
+      tooltip: null,
+    },
+    blink: {
+      name: "Blink",
+      icon: <FontAwesomeIcon size="xl" icon={faLightbulb} />,
+      color: null,
+      tooltip: null,
+    },
+    temperature: {
+      name: "Temperature",
+      icon: <FontAwesomeIcon size="xl" icon={faThermometer} />,
+      color: null,
+      tooltip: null,
+    },
+  };
 
   if (mod) {
     const featureMap = { ...elements };
@@ -92,9 +95,7 @@ const UseCaseLegend = ({ props }: { props?: { name?: string } }) => {
     featureMap["temperature"]["tooltip"] = "Can't Take Temperature";
 
     mod.summary.forEach((feature) => {
-      console.log(mod.name);
       if (feature.feature === "Frequency") {
-        console.log(feature.value);
         if (feature.value === "LF" || feature.value === "Dual") {
           featureMap["lf"]["color"] = "white";
           featureMap["lf"]["tooltip"] =
@@ -118,18 +119,22 @@ const UseCaseLegend = ({ props }: { props?: { name?: string } }) => {
         featureMap["digital_security"]["color"] = "white";
         featureMap["digital_security"]["tooltip"] =
           "Has Digital Security Features";
+      } else if (feature.feature === "Blink") {
+        featureMap["blink"]["color"] = "white";
+        featureMap["blink"]["tooltip"] = feature.value;
+      } else if (feature.feature === "Payment") {
+        featureMap["payment"]["color"] =
+          feature.value === "Yes" ? "white" : "yellow";
+        featureMap["payment"]["tooltip"] = feature.value;
       }
     });
     return (
       <Grid
-        component={Paper}
         container
         sx={{
           flex: 1,
           flexDirection: "row",
           justifyContent: "space-evenly",
-          p: "1rem",
-          borderRadius: 3,
         }}
       >
         {Object.keys(featureMap).map((e, i) => (
@@ -158,7 +163,7 @@ const UseCaseLegend = ({ props }: { props?: { name?: string } }) => {
         flexGrow: 1,
       }}
     >
-      {Object.keys(elements).map((e, i) => (
+      {Object.keys({ ...elements }).map((e, i) => (
         <Tooltip key={i} title={elements[e].name}>
           <Stack mx={1}>{elements[e].icon}</Stack>
         </Tooltip>

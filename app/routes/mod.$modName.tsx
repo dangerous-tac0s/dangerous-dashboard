@@ -111,7 +111,15 @@ export function ModDetailRoute() {
           gap={5}
         >
           {mod.mod_type.toLowerCase() === "chip" ? (
-            <UseCaseLegend props={{ name: mod.name }} />
+            <Box
+              component={Paper}
+              sx={{
+                p: "1rem",
+                borderRadius: 3,
+              }}
+            >
+              <UseCaseLegend props={{ name: mod.name }} />
+            </Box>
           ) : (
             ""
           )}
