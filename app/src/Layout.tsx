@@ -31,6 +31,7 @@ import { useLayout } from "./LayoutContext"; // Import LayoutContext
 import { defaults } from "./LayoutContext";
 import theme from "~/src/theme";
 import { faChartSimpleHorizontal } from "@fortawesome/pro-regular-svg-icons/faChartSimpleHorizontal";
+import { faMagnifyingGlass } from "@fortawesome/pro-regular-svg-icons/faMagnifyingGlass";
 
 const navItems = [
   // { name: "About", route: "/about" },
@@ -38,6 +39,11 @@ const navItems = [
     name: "Chart",
     route: "/chart",
     icon: <FontAwesomeIcon icon={faChartSimpleHorizontal} />,
+  },
+  {
+    name: "Finder",
+    route: "/finder",
+    icon: <FontAwesomeIcon icon={faMagnifyingGlass} />,
   },
 ];
 
@@ -134,7 +140,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         return (
           <Grid container sx={{ flexDirection: "row", flex: 1 }}>
             <Box>
-              <FormControl sx={{ m: 1, width: 300 }} size={"small"}>
+              <FormControl sx={{ m: 1, width: 200 }} size={"small"}>
                 <InputLabel id="type-filter-label">Type</InputLabel>
                 <Select
                   labelId="type-filter-label"
@@ -171,7 +177,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             </Box>
             <Grid container alignItems={"center"} pl={2}>
               <FontAwesomeIcon icon={faCalendar} size={"xl"} />
-              <FormControl sx={{ m: 1, width: 300 }} size={"small"}>
+              <FormControl sx={{ m: 1, width: 200 }} size={"small"}>
                 <InputLabel id="type-filter-label">Period</InputLabel>
                 <Select
                   size={"small"}
@@ -229,7 +235,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         position="static"
         sx={{ backgroundColor: theme.palette.action.active }}
       >
-        <Toolbar>
+        <Toolbar component={Paper}>
           <Box flexGrow={1}>
             <GenerateBreadcrumbs />
           </Box>
@@ -243,6 +249,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                   key={i}
                   sx={{ color: "#fff" }}
                   to={item.route}
+                  disabled={item.name.toLowerCase() === "finder"}
                 >
                   {item.icon ?? item.name}
                   <Typography display={{ xs: "none", sm: "block" }} pl={1}>

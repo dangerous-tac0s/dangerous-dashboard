@@ -30,6 +30,7 @@ import {
   TableRow,
 } from "@mui/material";
 import theme from "~/src/theme";
+import UseCaseLegend from "~/src/UseCaseLegend";
 
 // const MultiSelectCheckmarks = lazy(() => import("../MultiSelect"));
 
@@ -272,23 +273,29 @@ const Chart = () => {
       >
         <Table>
           <TableHead
+            component={Paper}
             sx={{
-              backgroundColor:
-                theme.palette.mode === "dark"
-                  ? theme.palette.action.active
-                  : theme.palette.action.selected,
+              backgroundColor: theme.palette.action.selected,
             }}
           >
-            <TableRow>
-              <TableCell
-                sx={{
-                  color: theme.palette.getContrastText(
-                    theme.palette.mode === "dark"
-                      ? theme.palette.action.active
-                      : theme.palette.action.selected,
-                  ),
-                }}
-              >
+            {mod.mod_type.toLowerCase() === "chip" ? (
+              <TableRow>
+                <TableCell colSpan={2}>
+                  <UseCaseLegend props={{ name: mod.name }} />
+                </TableCell>
+              </TableRow>
+            ) : (
+              ""
+            )}
+            <TableRow
+              component={Paper}
+              sx={{
+                color: theme.palette.getContrastText(
+                  theme.palette.action.active,
+                ),
+              }}
+            >
+              <TableCell>
                 {formatter ? formatter(label as number) : label}
               </TableCell>
               <TableCell>
@@ -300,10 +307,7 @@ const Chart = () => {
           </TableHead>
           <TableBody
             sx={{
-              backgroundColor:
-                theme.palette.mode === "dark"
-                  ? theme.palette.action.selected
-                  : theme.palette.action.active,
+              backgroundColor: theme.palette.action.selected,
             }}
           >
             <TableRow>

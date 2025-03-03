@@ -21,6 +21,7 @@ import { faList } from "@fortawesome/pro-regular-svg-icons/faList";
 import { faMagnifyingGlass } from "@fortawesome/pro-regular-svg-icons/faMagnifyingGlass";
 import { faCamera } from "@fortawesome/pro-regular-svg-icons/faCamera";
 import { faCircleNodes } from "@fortawesome/pro-regular-svg-icons/faCircleNodes";
+import UseCaseLegend from "~/src/UseCaseLegend";
 
 const getMod = (name: string) => {
   if (Object.keys(MAGNET_IMPLANT_MAP).includes(name)) {
@@ -102,11 +103,18 @@ export function ModDetailRoute() {
         <Grid size={{ xl: 3, xs: 12 }}>{/* Empty content on the right */}</Grid>
         {/* Card for sections */}
         <Grid
-          justifyContent={"center"}
+          flexDirection={"column"}
+          alignItems={"center"}
           size={{ xl: 6, xs: 12 }}
           offset={3}
           container
+          gap={5}
         >
+          {mod.mod_type.toLowerCase() === "chip" ? (
+            <UseCaseLegend props={{ name: mod.name }} />
+          ) : (
+            ""
+          )}
           <Box sx={{ position: "relative", width: 500, height: 550 }}>
             <Box
               component={Paper}

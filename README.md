@@ -20,6 +20,10 @@ Upcoming:
 - ~~Implant Summary On Hover~~
 - Implement all chips and mods
 - A proper landing page
+- Features
+  - How common is each
+  - How popular are they
+  - wtf is it?
 
 ## Getting Started
 - Install Node 20

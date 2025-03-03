@@ -334,7 +334,7 @@ export const CHIP_IMPLANT_MAP: Record<string, () => ModInterface> = {
       name: "DT flexEM",
       chip: [CHIP_MAP["T5577"]()],
       install_method: "Scalpel",
-      form_factor: "x-Series",
+      form_factor: "flex",
     }),
   "DT flexDF": () =>
     new ChipImplant({
