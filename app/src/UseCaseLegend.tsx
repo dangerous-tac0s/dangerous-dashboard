@@ -133,7 +133,7 @@ const UseCaseLegend = ({ props }: { props?: { name?: string } }) => {
         container
         sx={{
           flexDirection: "row",
-          justifyContent: "space-evenly",
+          justifyContent: "center",
         }}
         gap={{ xs: 3, sm: 0 }}
       >

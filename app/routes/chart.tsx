@@ -15,12 +15,9 @@ import {
   XAxis,
   YAxis,
   Tooltip,
-  AreaChart,
-  Area,
 } from "recharts";
 import { useLayout } from "~/src/LayoutContext";
 import {
-  Container,
   Grid,
   Paper,
   Table,
@@ -210,7 +207,10 @@ const Chart = () => {
 
   // A single handler for all bars
   const handleBarClick = (dataItem: ChartDataItem) => {
-    if (tooltipVisible && previousClick === dataItem.product) {
+    if (
+      tooltipVisible &&
+      (previousClick === dataItem.product || previousClick === null)
+    ) {
       // Navigate to /mod/<productName>
       setPreviousClick(null);
       navigate(`/mod/${encodeURIComponent(dataItem.product)}`);
@@ -291,6 +291,16 @@ const Chart = () => {
         component={Paper}
         border={`solid thin ${theme.palette.mode === "dark" ? "black" : "gray"}`}
       >
+        {["chip", "xled"].includes(mod.mod_type.toLowerCase()) ? (
+          <Box
+            component={Paper}
+            sx={{ backgroundColor: theme.palette.action.selected, py: 2 }}
+          >
+            <UseCaseLegend props={{ name: mod.name }} />
+          </Box>
+        ) : (
+          ""
+        )}
         <Table>
           <TableHead
             component={Paper}
@@ -298,15 +308,15 @@ const Chart = () => {
               backgroundColor: theme.palette.action.selected,
             }}
           >
-            {["chip", "xled"].includes(mod.mod_type.toLowerCase()) ? (
-              <TableRow>
-                <TableCell colSpan={2}>
-                  <UseCaseLegend props={{ name: mod.name }} />
-                </TableCell>
-              </TableRow>
-            ) : (
-              ""
-            )}
+            {/*{["chip", "xled"].includes(mod.mod_type.toLowerCase()) ? (*/}
+            {/*  <TableRow>*/}
+            {/*    <TableCell colSpan={2}>*/}
+            {/*      <UseCaseLegend props={{ name: mod.name }} />*/}
+            {/*    </TableCell>*/}
+            {/*  </TableRow>*/}
+            {/*) : (*/}
+            {/*  ""*/}
+            {/*)}*/}
             <TableRow
               component={Paper}
               sx={{
@@ -413,10 +423,13 @@ const Chart = () => {
         <Bar
           dataKey="direct"
           onClick={handleBarClick}
-          onMouseMove={(e) =>
-            setTooltipVisible(e.activeTooltipIndex !== undefined)
-          }
-          onMouseLeave={() => setTooltipVisible(false)}
+          onMouseEnter={() => {
+            setTooltipVisible(true);
+          }}
+          onMouseLeave={() => {
+            setPreviousClick(null);
+            setTooltipVisible(false);
+          }}
         >
           {data.map((entry, index) => (
             <Cell key={index} fill={colorMap[entry.product]} />
