@@ -14,7 +14,6 @@ import {
   DestronFearing,
   FidesmoP71,
   FREQ_MAP,
-  Hitag2048,
   ICODEDNA,
   ICODESLIX2,
   MagicMIFAREg1a,
@@ -27,6 +26,8 @@ import {
   CHIP_MAP,
   MagicInterface,
   JCOPInterface,
+  HitagS2048,
+  NTAG413DNA,
 } from "~/models/chip";
 
 export type ChipImplantType = "Chip" | "xLED";
@@ -452,7 +453,7 @@ export const CHIP_IMPLANT_MAP: Record<string, () => ModInterface> = {
       install_method: "Injectable",
       form_factor: "x-Series",
       mod_type: "Chip",
-      chip: [new Hitag2048()],
+      chip: [new HitagS2048()],
     }),
   "DT xM1+": () =>
     new ChipImplant({
@@ -551,6 +552,6 @@ export const CHIP_IMPLANT_MAP: Record<string, () => ModInterface> = {
   "VivoKey Spark2": () =>
     new ChipImplant({
       name: "VivoKey Spark2",
-      chip: [],
+      chip: [new NTAG413DNA()],
     }),
 };

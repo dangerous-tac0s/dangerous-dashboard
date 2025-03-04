@@ -62,7 +62,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const GenerateBreadcrumbs = () => {
     const text: React.ReactNode[] = [
       <Link key="/" style={{ textDecoration: "none" }} to={"/"}>
-        <Typography display={{ md: "block", xs: "none", sm: "none" }}>
+        <Typography display={{ lg: "block", xs: "none" }}>
           Dangerous Dashboard
         </Typography>
       </Link>,
@@ -113,31 +113,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     );
   };
 
-  const handleDrawerToggle = () => {
-    setMobileOpen((prevState) => !prevState);
-  };
-
-  // TODO: Decide if this is going to be helpful... Maybe show the full filtering config?
-  const drawer = (
-    <Box onClick={handleDrawerToggle} sx={{ textAlign: "center" }}>
-      <Divider />
-      <List>
-        {navItems.map((item, i) => (
-          <ListItem key={i} disablePadding>
-            <ListItemButton
-              sx={{ textAlign: "center" }}
-              role={"button"}
-              component={Link}
-              to={item.route}
-            >
-              <ListItemText primary={item.name} />
-            </ListItemButton>
-          </ListItem>
-        ))}
-      </List>
-    </Box>
-  );
-
   const typeFilterIconMap = {
     chip: <FontAwesomeIcon size={"sm"} icon={faMicrochip} />,
     magnet: <FontAwesomeIcon size={"sm"} icon={faMagnet} />,
@@ -148,11 +123,14 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       case "/chart":
         return (
           <Grid container sx={{ flexDirection: "row", flex: 1 }} spacing={2}>
-            {filters["/chart"]["type"].filter((e) => e.active).length === 1 &&
+            {filters["/chart"]["type"].filter(
+              (e: { name: string; active: boolean }) => e.active,
+            ).length === 1 &&
             filters["/chart"]["type"].some(
-              (e) => e.name === "chips" && e.active,
+              (e: { name: string; active: boolean }) =>
+                e.name === "chips" && e.active,
             ) ? (
-              <Box alignContent={"center"} flexGrow={2}>
+              <Box alignContent={"center"}>
                 <UseCaseLegend />
               </Box>
             ) : (
@@ -246,6 +224,45 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const handleDrawerToggle = () => {
+    setMobileOpen((prevState) => !prevState);
+  };
+
+  // TODO: Decide if this is going to be helpful... Maybe show the full filtering config?
+  const drawer = (
+    <Grid
+      container
+      onClick={handleDrawerToggle}
+      sx={{
+        justifyContent: "center",
+        alignItems: "center",
+      }}
+    >
+      <Divider />
+      <FilterComponent />
+      <List>
+        {navItems.map((item, i) => (
+          <ListItem key={i} disablePadding>
+            <ListItemButton
+              sx={{ textAlign: "center" }}
+              role={"button"}
+              component={Link}
+              to={item.route}
+            >
+              <Button
+                variant={"outlined"}
+                fullWidth={true}
+                disabled={item.route === path}
+              >
+                <ListItemText primary={item.name} />
+              </Button>
+            </ListItemButton>
+          </ListItem>
+        ))}
+      </List>
+    </Grid>
+  );
+
   return (
     <Box>
       <AppBar
@@ -254,12 +271,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         sx={{ backgroundColor: theme.palette.action.active }}
       >
         <Toolbar component={Paper}>
-          <Box flexGrow={1}>
+          <Box>
             <GenerateBreadcrumbs />
           </Box>
-
+          <Box sx={{ flexGrow: 1 }}></Box>
           {/* TODO: Switch to hamburger menu on small screens*/}
-          <Box>
+          <Box sx={{ display: { xs: "none", md: "flex" } }}>
             {!["/chart"].includes(location.pathname) ? (
               navItems.map((item, i) => (
                 <Button

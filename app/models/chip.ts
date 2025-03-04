@@ -138,9 +138,9 @@ export class DestronFearing extends Chip implements ChipInterface {
   }
 }
 
-export class EM410x extends Chip implements ChipInterface {
+export class EM41xx extends Chip implements ChipInterface {
   constructor() {
-    super("EM410x", "64b", "134 kHz");
+    super("EM41xx", "64b", "134 kHz");
   }
 }
 
@@ -156,9 +156,9 @@ export class AWID extends Chip implements ChipInterface {
   }
 }
 
-export class Hitag2048 extends Chip implements ChipInterface {
+export class HitagS2048 extends Chip implements ChipInterface {
   constructor() {
-    super("Hitag 2048", ["64b"], ["125 kHz"], {
+    super("Hitag S 2048", ["64b"], ["125 kHz"], {
       cryptographic: {
         supported: true,
         auth_methods: ["Proprietary"],
@@ -191,7 +191,7 @@ export class T5577 extends Chip implements ChipInterface {
     this._features.magic.supported = true;
     this._features.magic.invoked_by = ["wake up"];
     this._features.magic.chips = [
-      new EM410x(),
+      new EM41xx(),
       new HIDProx(),
       new AWID(),
       new Indala(),
@@ -208,7 +208,20 @@ export class T5577 extends Chip implements ChipInterface {
 export class NTAG216 extends Chip implements ChipInterface {
   constructor() {
     super("NTAG216", "7B", "13.56 MHz", {
-      ndef: { supported: true, capacity: "888 B" },
+      ndef: { supported: true, capacity: "880 B" },
+    });
+  }
+}
+
+export class NTAG413DNA extends Chip implements ChipInterface {
+  constructor(spark: boolean = true) {
+    super("NTAG413DNA", "7B", "13.56 MHz", {
+      ndef: { supported: !spark },
+      spark: { supported: spark },
+      iso: ["14443a"],
+      cryptographic: {
+        supported: true,
+      },
     });
   }
 }
@@ -228,7 +241,7 @@ export class P71 extends Chip implements ChipInterface {
     super(name, "7B", "13.56 MHz", {
       ndef: { supported: true, capacity: "32 kB" },
       jcop: { supported: true, version: "3.0.5" },
-      iso: ["14443a", "7816"],
+      iso: ["14443a"],
       cryptographic: {
         supported: true,
         auth_methods: [
@@ -309,7 +322,7 @@ export class ICODESLIX2 extends Chip {
   constructor() {
     super("ICODE SLIX2", "8B", "13.56 MHz", {
       ndef: { supported: true, capacity: "320 B" },
-      iso: ["15693", "18000-3"],
+      iso: ["15693"],
     });
   }
 }
@@ -327,7 +340,7 @@ export class ICODEDNA extends Chip {
         key_management: "Dynamic diversified keys",
         clone_protection: true,
       },
-      iso: ["15693", "18000-3"],
+      iso: ["15693"],
       spark: { supported: spark },
     });
   }
@@ -370,7 +383,7 @@ export class PaymentChip extends Chip implements ChipInterface {
   constructor() {
     super("Payment Chip", [], ["13.56 MHz"], {
       payment: { supported: true, enabled: true },
-      iso: ["14443a", "7816"],
+      iso: ["14443a"],
     });
   }
 }
@@ -383,7 +396,7 @@ export const CHIP_MAP = {
         supported: true,
         invoked_by: ["wake up"],
         chips: [
-          new EM410x(),
+          new EM41xx(),
           new HIDProx(),
           new AWID(),
           new Indala(),

@@ -198,6 +198,8 @@ const Chart = () => {
     () => ModInterface
   > | null>(null);
   const { filters } = useLayout();
+  const [tooltipVisible, setTooltipVisible] = useState(false);
+  const [previousClick, setPreviousClick] = useState<string | null>(null);
 
   const mode =
     Object.keys(filters).length > 0
@@ -208,8 +210,14 @@ const Chart = () => {
 
   // A single handler for all bars
   const handleBarClick = (dataItem: ChartDataItem) => {
-    // Navigate to /mod/<productName>
-    navigate(`/mod/${encodeURIComponent(dataItem.product)}`);
+    if (tooltipVisible && previousClick === dataItem.product) {
+      // Navigate to /mod/<productName>
+      setPreviousClick(null);
+      navigate(`/mod/${encodeURIComponent(dataItem.product)}`);
+    } else {
+      setPreviousClick(dataItem.product);
+      setTooltipVisible(true);
+    }
   };
 
   const applyFilters = (
@@ -252,22 +260,34 @@ const Chart = () => {
     payload,
     label,
     formatter,
+    position,
   }: {
     active: boolean;
     payload: never | { dataKey: string; color: string; value: number }[];
     label: string | number;
     formatter: (value: number) => string;
+    position: { x?: number; y?: number };
   }) {
+    const [hovered, setHovered] = useState(false);
+    if (!active && !hovered) return null;
     if (!ALL_MODS) {
       return null;
     }
+
     const mod = Object.hasOwn(ALL_MODS, label) ? ALL_MODS[label]() : null;
     if (!active || !mod || !payload || payload.length === 0) {
       return null;
     }
 
     return mod ? (
-      <Box
+      <Grid
+        size={{ xs: 12, lg: 6, xl: 4 }}
+        sx={{
+          position: "fixed",
+          top: position?.y ?? "50%",
+          left: position?.x ?? "50%",
+          transform: "translate(-50%, -50%)",
+        }}
         component={Paper}
         border={`solid thin ${theme.palette.mode === "dark" ? "black" : "gray"}`}
       >
@@ -334,7 +354,7 @@ const Chart = () => {
             )}
           </TableBody>
         </Table>
-      </Box>
+      </Grid>
     ) : (
       ""
     );
@@ -360,7 +380,7 @@ const Chart = () => {
       <BarChart
         layout="vertical" // Make it horizontal
         data={data}
-        margin={{ top: 20, right: 50, left: 10, bottom: 20 }} // Adjust for long labels
+        margin={{ top: 20, right: 50, left: 0, bottom: 20 }} // Adjust for long labels
       >
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis
@@ -378,17 +398,26 @@ const Chart = () => {
               fontSize={18}
               textAnchor="end"
               fill="#666"
-              style={{ whiteSpace: "nowrap" }} // Prevent wrapping
+              style={{ whiteSpace: "pre-line" }} // Prevent wrapping
             >
               {/* Trim the labels to reduce the width... Slightly. */}
-              {payload.value.replace(/^(DT|VivoKey)\W/, "")}
+              {payload.value
+                .replace(/^(DT|VivoKey)\W/, "")
+                .replace(/Payment\WConversion/, "Payment\nConversion")}
             </text>
           )}
           width={200}
         />
         {/* @ts-expect-error BarChat is passing params to the tooltip*/}
         <Tooltip content={<CustomTooltip />} />
-        <Bar dataKey="direct" onClick={handleBarClick}>
+        <Bar
+          dataKey="direct"
+          onClick={handleBarClick}
+          onMouseMove={(e) =>
+            setTooltipVisible(e.activeTooltipIndex !== undefined)
+          }
+          onMouseLeave={() => setTooltipVisible(false)}
+        >
           {data.map((entry, index) => (
             <Cell key={index} fill={colorMap[entry.product]} />
           ))}

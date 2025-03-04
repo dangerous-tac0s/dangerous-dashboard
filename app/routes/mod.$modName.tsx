@@ -86,7 +86,12 @@ export function ModDetailRoute() {
         <Grid
           size={{ xl: 3, xs: 12 }}
           alignContent={"center"}
-          textAlign={"end"}
+          textAlign={{ xs: "center", md: "end" }}
+          sx={{
+            mb: { xs: 0, xl: 4 },
+            mt: { xs: 4, xl: 0 },
+            mr: { xs: 0, md: 4, xl: 0 },
+          }}
         >
           {/* Back Button and Page Title */}
           Annual Change in Popularity
@@ -106,7 +111,7 @@ export function ModDetailRoute() {
           flexDirection={"column"}
           alignItems={"center"}
           size={{ xl: 6, xs: 12 }}
-          offset={3}
+          offset={{ xs: 0, xl: 3 }}
           container
           gap={5}
         >
@@ -123,53 +128,51 @@ export function ModDetailRoute() {
           ) : (
             ""
           )}
-          <Box sx={{ position: "relative", width: 500, height: 550 }}>
-            <Box
-              component={Paper}
-              display={{ xs: "none", lg: "block" }}
-              sx={{
-                width: "100%",
-                height: "100%",
-                clipPath:
-                  "polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <Box textAlign={"center"}>
-                <Typography variant={"h5"}> Coming Soon™</Typography>
-                <List className={"list-disc pl-10"}>
-                  <ListItem>
-                    <ListItemIcon>
-                      <FontAwesomeIcon icon={faMagnifyingGlass} />
-                    </ListItemIcon>
-                    <ListItemText primary={"Detailed views of features"} />
-                  </ListItem>
-                  <ListItem>
-                    <ListItemIcon>
-                      <FontAwesomeIcon icon={faList} />
-                    </ListItemIcon>
-                    <ListItemText primary={"Description of Mod"} />
-                  </ListItem>
-                  <ListItem>
-                    <ListItemIcon>
-                      <FontAwesomeIcon icon={faCamera} />
-                    </ListItemIcon>
-                    <ListItemText primary={"Photo or maybe render"} />
-                  </ListItem>
-                  <ListItem>
-                    <ListItemIcon>
-                      <FontAwesomeIcon icon={faCircleNodes} />
-                    </ListItemIcon>
-                    <ListItemText
-                      primary={"List possible similar alternatives"}
-                    />
-                  </ListItem>
-                </List>
-              </Box>
-            </Box>
+          {/*<Box sx={{ position: "relative", width: 500, height: 550 }}>*/}
+          {/*  <Box*/}
+          {/*    component={Paper}*/}
+          {/*    display={{ xs: "none", lg: "block" }}*/}
+          {/*    sx={{*/}
+          {/*      width: "100%",*/}
+          {/*      height: "100%",*/}
+          {/*      clipPath:*/}
+          {/*        "polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)",*/}
+          {/*      display: "flex",*/}
+          {/*      alignItems: "center",*/}
+          {/*      justifyContent: "center",*/}
+          {/*    }}*/}
+          {/*  >*/}
+          <Box component={Paper} sx={{ p: 3, borderRadius: 3 }}>
+            <Typography variant={"h5"}> Coming Soon™</Typography>
+            <List className={"list-disc pl-10"}>
+              <ListItem>
+                <ListItemIcon>
+                  <FontAwesomeIcon icon={faMagnifyingGlass} />
+                </ListItemIcon>
+                <ListItemText primary={"Detailed views of features"} />
+              </ListItem>
+              <ListItem>
+                <ListItemIcon>
+                  <FontAwesomeIcon icon={faList} />
+                </ListItemIcon>
+                <ListItemText primary={"Description of Mod"} />
+              </ListItem>
+              <ListItem>
+                <ListItemIcon>
+                  <FontAwesomeIcon icon={faCamera} />
+                </ListItemIcon>
+                <ListItemText primary={"Photo or maybe render"} />
+              </ListItem>
+              <ListItem>
+                <ListItemIcon>
+                  <FontAwesomeIcon icon={faCircleNodes} />
+                </ListItemIcon>
+                <ListItemText primary={"List possible similar alternatives"} />
+              </ListItem>
+            </List>
           </Box>
+          {/*  </Box>*/}
+          {/*</Box>*/}
         </Grid>
       </Grid>
     </>

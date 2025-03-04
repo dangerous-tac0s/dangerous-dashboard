@@ -132,24 +132,33 @@ const UseCaseLegend = ({ props }: { props?: { name?: string } }) => {
       <Grid
         container
         sx={{
-          flex: 1,
           flexDirection: "row",
           justifyContent: "space-evenly",
         }}
+        gap={{ xs: 3, sm: 0 }}
       >
-        {Object.keys(featureMap).map((e, i) => (
-          <Tooltip key={i} title={featureMap[e].tooltip}>
-            <Stack color={featureMap[e].color ?? "red"} mx={1}>
-              {featureMap[e].icon}
-            </Stack>
-          </Tooltip>
-        ))}
-        <Stack direction="column" alignItems="center" justifyContent="center">
-          {/*<FontAwesomeIcon*/}
-          {/*  icon={faWifi}*/}
-          {/*  style={{ marginTop: "-1.2em", marginRight: "-1.5em" }}*/}
-          {/*/>*/}
-        </Stack>
+        <Grid sx={{ xs: 12, md: 6 }} container>
+          {Object.keys(featureMap)
+            .slice(0, 4)
+            .map((e, i) => (
+              <Tooltip key={i} title={featureMap[e].tooltip}>
+                <Stack color={featureMap[e].color ?? "red"} mx={1}>
+                  {featureMap[e].icon}
+                </Stack>
+              </Tooltip>
+            ))}
+        </Grid>{" "}
+        <Grid sx={{ xs: 12, md: 6 }} container>
+          {Object.keys(featureMap)
+            .slice(4)
+            .map((e, i) => (
+              <Tooltip key={i} title={featureMap[e].tooltip}>
+                <Stack color={featureMap[e].color ?? "red"} mx={1}>
+                  {featureMap[e].icon}
+                </Stack>
+              </Tooltip>
+            ))}
+        </Grid>
       </Grid>
     );
   }
@@ -157,15 +166,14 @@ const UseCaseLegend = ({ props }: { props?: { name?: string } }) => {
     <Grid
       container
       sx={{
-        flex: 1,
         flexDirection: "row",
         justifyContent: "space-evenly",
-        flexGrow: 1,
       }}
+      spacing={1}
     >
       {Object.keys({ ...elements }).map((e, i) => (
         <Tooltip key={i} title={elements[e].name}>
-          <Stack mx={1}>{elements[e].icon}</Stack>
+          {elements[e].icon}
         </Tooltip>
       ))}
     </Grid>
