@@ -1,4 +1,15 @@
-import { Grid, IconButton, Paper, Tooltip } from "@mui/material";
+import {
+  ButtonGroup,
+  ClickAwayListener,
+  Grid,
+  Grow,
+  IconButton,
+  MenuItem,
+  MenuList,
+  Paper,
+  Popper,
+  Tooltip,
+} from "@mui/material";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Stack } from "@mui/system";
 import { faKeySkeleton } from "@fortawesome/pro-light-svg-icons/faKeySkeleton";
@@ -19,6 +30,8 @@ import Typography from "@mui/material/Typography";
 import theme from "~/src/theme";
 import Box from "@mui/material/Box";
 import { useLayout } from "~/src/LayoutContext";
+import React, { useEffect } from "react";
+import { faArrowDown } from "@fortawesome/pro-regular-svg-icons";
 
 const makeLegendElements = (): {
   [key: string]: {
@@ -83,6 +96,139 @@ const makeLegendElements = (): {
   );
 };
 
+export function SplitButton({
+  icon,
+  onClickButton,
+  buttonActive,
+  onOptionClick,
+  options,
+}) {
+  const [open, setOpen] = React.useState(false);
+  const anchorRef = React.useRef<HTMLDivElement>(null);
+  const [selectedIndex, setSelectedIndex] = React.useState(1);
+  const [thumbIconOpacity, setThumbIconOpacity] = React.useState(0);
+  const [thumbColor, setThumbColor] = React.useState(
+    theme.palette.action.disabled,
+  );
+  const [dropDownDisabled, setDropDownDisabled] = React.useState(true);
+  const [buttonBorder, setButtonBorder] = React.useState(0);
+
+  const handleClick = () => {
+    console.info(`You clicked ${options[selectedIndex]}`);
+  };
+
+  const handleMenuItemClick = (
+    event: React.MouseEvent<HTMLLIElement, MouseEvent>,
+    index: number,
+  ) => {
+    setSelectedIndex(index);
+    setOpen(false);
+  };
+
+  const handleToggle = () => {
+    if (buttonActive && options.length > 0) {
+      setOpen((prevOpen) => !prevOpen);
+    }
+  };
+
+  const handleClose = (event: Event) => {
+    if (
+      anchorRef.current &&
+      anchorRef.current.contains(event.target as HTMLElement)
+    ) {
+      return;
+    }
+
+    setOpen(false);
+  };
+
+  useEffect(() => {
+    if (buttonActive) {
+      if (options.length > 0) {
+        setButtonBorder(1);
+        setThumbIconOpacity(1);
+        setThumbColor(theme.palette.action.active);
+        setDropDownDisabled(false);
+      }
+    }
+    if (!buttonActive) {
+      setThumbIconOpacity(0);
+      setButtonBorder(0);
+      setThumbColor(theme.palette.action.disabled);
+      setDropDownDisabled(true);
+    }
+  }, [buttonActive]);
+
+  return (
+    <React.Fragment>
+      <ButtonGroup
+        color={theme.palette.primary.dark}
+        ref={anchorRef}
+        aria-label="Button group with a nested menu"
+      >
+        <Button sx={{ border: buttonBorder }} onClick={onClickButton}>
+          {icon}
+        </Button>
+        <Button
+          size="small"
+          aria-controls={open ? "split-button-menu" : undefined}
+          aria-expanded={open ? "true" : undefined}
+          aria-haspopup="menu"
+          onClick={handleToggle}
+          disabled={dropDownDisabled}
+          sx={{
+            border: buttonBorder,
+            "&.Mui-disabled": {
+              border: 0, // if you want to override the default opacity
+            },
+          }}
+        >
+          <FontAwesomeIcon
+            opacity={thumbIconOpacity}
+            color={thumbColor}
+            icon={faArrowDown}
+          />
+        </Button>
+      </ButtonGroup>
+      <Popper
+        sx={{ zIndex: 1 }}
+        open={open}
+        anchorEl={anchorRef.current}
+        role={undefined}
+        transition
+        disablePortal
+      >
+        {({ TransitionProps, placement }) => (
+          <Grow
+            {...TransitionProps}
+            style={{
+              transformOrigin:
+                placement === "bottom" ? "center top" : "center bottom",
+            }}
+          >
+            <Paper>
+              <ClickAwayListener onClickAway={handleClose}>
+                <MenuList id="split-button-menu" autoFocusItem>
+                  {options.map((option, index) => (
+                    <MenuItem
+                      key={index}
+                      disabled={index === 2}
+                      selected={index === selectedIndex}
+                      onClick={(event) => handleMenuItemClick(event, index)}
+                    >
+                      {option}
+                    </MenuItem>
+                  ))}
+                </MenuList>
+              </ClickAwayListener>
+            </Paper>
+          </Grow>
+        )}
+      </Popper>
+    </React.Fragment>
+  );
+}
+
 export const LegendMenu = () => {
   const { filters, toggleChipFilter } = useLayout();
   const chipFilters = filters["/chart"].chip;
@@ -96,24 +242,25 @@ export const LegendMenu = () => {
       display={"flex"}
       flexGrow={2}
       alignItems={"center"}
-      mx={"1rem"}
+      // mx={"1rem"}
     >
       {Object.keys(elements).map((key, i) => (
-        <IconButton
-          size={"small"}
-          key={i}
-          onClick={() => toggleChipFilter(key.toLowerCase().replace(" ", "_"))}
-        >
-          <Typography
-            color={
-              chipFilters[key.toLowerCase()]
-                ? theme.palette.action.active
-                : theme.palette.action.disabled
-            }
-          >
-            {elements[key].icon}
-          </Typography>
-        </IconButton>
+        <SplitButton
+          icon={
+            <Typography
+              color={
+                chipFilters[key.toLowerCase()]
+                  ? theme.palette.action.active
+                  : theme.palette.action.disabled
+              }
+            >
+              {elements[key].icon}
+            </Typography>
+          }
+          buttonActive={chipFilters[key]}
+          onClickButton={() => toggleChipFilter(key.toLowerCase())}
+          options={["one", "two", "three"]}
+        />
       ))}
     </Grid>
   );

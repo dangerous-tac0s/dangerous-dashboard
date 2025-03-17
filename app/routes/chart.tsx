@@ -28,9 +28,6 @@ import {
 } from "@mui/material";
 import theme from "~/src/theme";
 import UseCaseLegend from "~/src/UseCaseLegend";
-import { FREQ_MAP } from "~/models/chip";
-
-// const MultiSelectCheckmarks = lazy(() => import("../MultiSelect"));
 
 // Vaguely colorblind safe
 export const colorPalette45: string[] = [
@@ -188,7 +185,6 @@ type ChartDataItem = {
 const Chart = () => {
   const navigate = useNavigate();
   const dataObj = useLoaderData<DataSet>();
-  const allYears = Object.keys(dataObj).filter((k) => k !== "overall");
   // const [mode, setMode] = useState("overall");
   const [colorMap, setColorMap] = useState<{ [key: string]: string }>({});
   const [ALL_MODS, setAll_MODS] = useState<Record<
@@ -257,8 +253,8 @@ const Chart = () => {
       if (Object.values(chipFilters).some((item) => item)) {
         // Get our active chip filters
         const activeChipFilters = Object.entries(chipFilters)
-          .filter(([name, active]) => active)
-          .map(([name, active]) => name);
+          .filter(([_name, active]) => active)
+          .map(([name, _active]) => name);
 
         updated = updated.filter((item) =>
           activeChipFilters.every((f) => {
@@ -290,7 +286,7 @@ const Chart = () => {
     formatter: (value: number) => string;
     position: { x?: number; y?: number };
   }) {
-    const [hovered, setHovered] = useState(false);
+    const [hovered, _setHovered] = useState(false);
     if (!active && !hovered) return null;
     if (!ALL_MODS) {
       return null;
@@ -425,7 +421,7 @@ const Chart = () => {
               fontSize={18}
               textAnchor="end"
               fill="#666"
-              style={{ whiteSpace: "pre-line" }} // Prevent wrapping
+              style={{ whiteSpace: "pre-line" }}
             >
               {/* Trim the labels to reduce the width... Slightly. */}
               {payload.value
@@ -434,6 +430,7 @@ const Chart = () => {
             </text>
           )}
           width={200}
+          interval={0}
         />
         {/* @ts-expect-error BarChat is passing params to the tooltip*/}
         <Tooltip content={<CustomTooltip />} />

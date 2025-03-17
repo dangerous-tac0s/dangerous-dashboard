@@ -62,9 +62,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const GenerateBreadcrumbs = () => {
     const text: React.ReactNode[] = [
       <Link key="/" style={{ textDecoration: "none" }} to={"/"}>
-        <Typography display={{ lg: "block", xs: "none" }}>
-          Dangerous Dashboard
-        </Typography>
+        <Typography display={{ lg: "block", xs: "none" }}>Home</Typography>
       </Link>,
     ];
 
@@ -275,11 +273,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   return (
     <Box>
-      <AppBar
-        component="nav"
-        position="static"
-        sx={{ backgroundColor: theme.palette.action.active }}
-      >
+      <AppBar component="nav" position="static">
         <Toolbar component={Paper}>
           <Box>
             <GenerateBreadcrumbs />
