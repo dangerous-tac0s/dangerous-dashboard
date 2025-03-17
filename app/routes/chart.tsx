@@ -1,7 +1,7 @@
 import Box from "@mui/material/Box";
 import { useLoaderData, useNavigate } from "@remix-run/react";
 import { useEffect, useState } from "react";
-import { CHIP_IMPLANT_MAP } from "~/models/chip_implant";
+import { CHIP_IMPLANT_MAP, ChipImplant } from "~/models/chip_implant";
 import { MAGNET_IMPLANT_MAP } from "~/models/magnet_implant";
 import { ModInterface } from "~/models/mod";
 import { json, MetaFunction } from "@remix-run/node";
@@ -28,6 +28,7 @@ import {
 } from "@mui/material";
 import theme from "~/src/theme";
 import UseCaseLegend from "~/src/UseCaseLegend";
+import { FREQ_MAP } from "~/models/chip";
 
 // const MultiSelectCheckmarks = lazy(() => import("../MultiSelect"));
 
@@ -223,6 +224,7 @@ const Chart = () => {
   const applyFilters = (
     data: { product: string; direct: number }[],
   ): { product: string; direct: number }[] => {
+    // Type Filter
     const active = filters["/chart"]["type"]
       .filter((t: { name: string; active: boolean }) => t.active)
       .map((t: { name: string; action: boolean }) => t.name);
@@ -244,6 +246,26 @@ const Chart = () => {
           break;
         default:
           updated = [];
+      }
+    }
+
+    // Chip
+    if (active.length === 1 && active.some((item) => item === "chips")) {
+      const chipFilters = { ...filters["/chart"].chip };
+
+      // At least one chip filter is in use
+      if (Object.values(chipFilters).some((item) => item)) {
+        // Get our active chip filters
+        const activeChipFilters = Object.entries(chipFilters)
+          .filter(([name, active]) => active)
+          .map(([name, active]) => name);
+
+        updated = updated.filter((item) =>
+          activeChipFilters.every((f) => {
+            const chipImplant: ChipImplant = CHIP_IMPLANT_MAP[item.product]();
+            return chipImplant.features[f].supported;
+          }),
+        );
       }
     }
 
@@ -308,15 +330,6 @@ const Chart = () => {
               backgroundColor: theme.palette.action.selected,
             }}
           >
-            {/*{["chip", "xled"].includes(mod.mod_type.toLowerCase()) ? (*/}
-            {/*  <TableRow>*/}
-            {/*    <TableCell colSpan={2}>*/}
-            {/*      <UseCaseLegend props={{ name: mod.name }} />*/}
-            {/*    </TableCell>*/}
-            {/*  </TableRow>*/}
-            {/*) : (*/}
-            {/*  ""*/}
-            {/*)}*/}
             <TableRow
               component={Paper}
               sx={{
@@ -380,6 +393,10 @@ const Chart = () => {
     });
     setColorMap(colorMap);
   }, []);
+
+  // useEffect(() => {
+  //   console.log(filters);
+  // }, [filters]);
 
   const barHeight = 50;
   const minHeight = 300;

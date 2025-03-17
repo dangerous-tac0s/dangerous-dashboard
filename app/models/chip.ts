@@ -46,10 +46,10 @@ export interface PaymentInterface extends FeatureSupportedInterface {
 export interface ChipFeaturesInterface {
   payment: PaymentInterface;
   ndef: NDEFInterface;
-  power_harvesting: FeatureType;
+  power_harvesting: FeatureSupportedInterface;
   jcop: JCOPInterface;
-  temperature: FeatureType;
-  spark: FeatureType;
+  temperature: FeatureSupportedInterface;
+  spark: FeatureSupportedInterface;
   cryptographic: ChipCryptographicInteface;
   iso: ISOStandards[];
   magic: MagicInterface;

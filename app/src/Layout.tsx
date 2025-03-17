@@ -35,7 +35,7 @@ import { faChartSimpleHorizontal } from "@fortawesome/pro-regular-svg-icons/faCh
 import { faMagnifyingGlass } from "@fortawesome/pro-regular-svg-icons/faMagnifyingGlass";
 import { faMagnet } from "@fortawesome/pro-light-svg-icons/faMagnet";
 import { faMicrochip } from "@fortawesome/pro-light-svg-icons/faMicrochip";
-import UseCaseLegend from "~/src/UseCaseLegend";
+import UseCaseLegend, { LegendMenu } from "~/src/UseCaseLegend";
 
 const navItems = [
   // { name: "About", route: "/about" },
@@ -53,7 +53,7 @@ const navItems = [
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const location = useLocation();
-  const { filters, setFilters, setTypeFilter } = useLayout();
+  const { filters, setFilters, setTypeFilter, toggleChipFilter } = useLayout();
   const [mobileOpen, setMobileOpen] = React.useState(false);
 
   const path = decodeURIComponent(location.pathname);
@@ -121,8 +121,19 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const FilterComponent = () => {
     switch (location.pathname) {
       case "/chart":
+        const chipFilters = { ...filters["/chart"].chip };
+        const asButtons = {};
+        Object.keys(filters["/chart"].chip).forEach((key: string) => {
+          asButtons[key] = {
+            onClick: () => {
+              toggleChipFilter(key);
+            },
+            color: chipFilters[key] ? "white" : "gray",
+          };
+        });
         return (
-          <Grid container sx={{ flexDirection: "row", flex: 1 }} spacing={2}>
+          <>
+            {/*  < container sx={{ flexDirection: "row", flex: 2 }} spacing={2}>*/}
             {filters["/chart"]["type"].filter(
               (e: { name: string; active: boolean }) => e.active,
             ).length === 1 &&
@@ -130,9 +141,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               (e: { name: string; active: boolean }) =>
                 e.name === "chips" && e.active,
             ) ? (
-              <Box alignContent={"center"}>
-                <UseCaseLegend />
-              </Box>
+              <LegendMenu />
             ) : (
               ""
             )}
@@ -217,7 +226,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 </Select>
               </FormControl>
             </Grid>
-          </Grid>
+            {/*</Grid>*/}
+          </>
         );
       default:
         return null;
@@ -274,9 +284,14 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           <Box>
             <GenerateBreadcrumbs />
           </Box>
-          <Box sx={{ flexGrow: 1 }}></Box>
           {/* TODO: Switch to hamburger menu on small screens*/}
-          <Box sx={{ display: { xs: "none", md: "flex" } }}>
+          <Box
+            sx={{
+              display: { xs: "none", md: "flex" },
+              flexGrow: 1,
+              justifyContent: "flex-end",
+            }}
+          >
             {!["/chart"].includes(location.pathname) ? (
               navItems.map((item, i) => (
                 <Button

@@ -14,6 +14,22 @@ export function useLayout() {
 
 export const defaults = {
   "/chart": {
+    chip: {
+      smartphone: false,
+      legacy_access_control: false,
+      digital_security: false,
+      data_sharing: false,
+      payment: false,
+      magic: false,
+      blink: false,
+      temperature: false,
+    },
+
+    hf: {
+      iso15693: false,
+      iso14443: false,
+    },
+
     type: [
       { name: "chips", active: true },
       { name: "magnets", active: true },
@@ -68,8 +84,23 @@ export function LayoutProvider({ children }) {
     });
   };
 
+  const toggleChipFilter = (feature: string) => {
+    setFilters({
+      ...filters,
+      ["/chart"]: {
+        ...filters["/chart"],
+        chip: {
+          ...filters["/chart"].chip,
+          [feature]: !filters["/chart"].chip[feature],
+        },
+      },
+    });
+  };
+
   return (
-    <LayoutContext.Provider value={{ filters, setFilters, setTypeFilter }}>
+    <LayoutContext.Provider
+      value={{ filters, setFilters, setTypeFilter, toggleChipFilter }}
+    >
       {children}
     </LayoutContext.Provider>
   );

@@ -45,6 +45,8 @@ export interface BlinkType extends FeatureSupportedInterface {
 }
 
 export type ChipImplantFeaturesType = {
+  smartphone: FeatureSupportedInterface;
+  legeacy_access_control: FeatureSupportedInterface;
   blink: BlinkType;
   cryptography: ChipCryptographicInteface;
   ndef: NDEFInterface;
@@ -93,6 +95,14 @@ export class ChipImplant extends Mod implements ChipImplantInterface {
 
     this.chip = chip ?? [];
     this.form_factor = form_factor ?? "x-Series";
+
+    this.chip.forEach((c) => {
+      Object.keys(c.features).forEach((key) => {
+        if (c?.features[key]?.supported) {
+          this._features[key] = { ...this._features[key], ...c.features[key] };
+        }
+      });
+    });
   }
 
   get uid_length(): string[] {
@@ -110,13 +120,34 @@ export class ChipImplant extends Mod implements ChipImplantInterface {
   }
 
   get features(): ChipImplantFeaturesType {
+    let smartphone = false;
+    let legacyAccessControl = false;
+    if (this.summary_frequency) {
+      smartphone = ["HF", "Dual"].includes(this.summary_frequency["value"]);
+      legacyAccessControl = ["LF", "Dual"].includes(
+        this.summary_frequency["value"],
+      );
+    }
     return {
-      blink: this._features.blink,
-      cryptography: this._features.cryptography,
-      ndef: this._features.ndef,
-      jcop: this._features.jcop,
-      temperature: this._features.temperature,
-    } as ChipImplantFeaturesType;
+      smartphone: {
+        supported: smartphone,
+      },
+      legacy_access_control: {
+        supported: legacyAccessControl,
+      },
+      digital_security: { ...this._features.jcop } ?? { supported: false },
+      data_sharing: {
+        supported:
+          this._features?.ndef?.supported || this._features?.spark?.supported,
+      },
+      blink: { ...this._features.blink },
+      cryptography: { ...this._features.cryptography } ?? { supported: false },
+      ndef: { ...this._features.ndef } ?? { supported: false },
+      jcop: { ...this._features.jcop } ?? { supported: false },
+      temperature: { ...this._features.temperature },
+      payment: { ...this._features.payment },
+      magic: { ...this._features.magic },
+    };
   }
 
   get summary_blink(): SummaryLine | null {
