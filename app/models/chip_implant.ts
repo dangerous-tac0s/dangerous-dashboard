@@ -150,6 +150,17 @@ export class ChipImplant extends Mod implements ChipImplantInterface {
     };
   }
 
+  get options() {
+    return {
+      smartphone: {
+        iso: this.chip
+          .filter((c) => c.frequency.includes("13.56 MHz"))
+          .map((c) => c.features.iso)
+          .flat(),
+      },
+    };
+  }
+
   get summary_blink(): SummaryLine | null {
     if (this.features.blink.supported) {
       return {

@@ -259,6 +259,7 @@ const Chart = () => {
         updated = updated.filter((item) =>
           activeChipFilters.every((f) => {
             const chipImplant: ChipImplant = CHIP_IMPLANT_MAP[item.product]();
+            // console.log(chipImplant.options);
             return chipImplant.features[f].supported;
           }),
         );
@@ -310,24 +311,23 @@ const Chart = () => {
         border={`solid thin ${theme.palette.mode === "dark" ? "black" : "gray"}`}
       >
         {["chip", "xled"].includes(mod.mod_type.toLowerCase()) ? (
-          <Box
-            component={Paper}
-            sx={{ backgroundColor: theme.palette.action.selected, py: 2 }}
-          >
-            <UseCaseLegend props={{ name: mod.name }} />
-          </Box>
+          // <Grid
+          //   container
+          //   component={Paper}
+          //   sx={{ backgroundColor: theme.palette.action.selected, py: 2 }}
+          // >
+          <UseCaseLegend props={{ name: mod.name }} />
         ) : (
+          // </Grid>
           ""
         )}
         <Table>
           <TableHead
-            component={Paper}
             sx={{
-              backgroundColor: theme.palette.action.selected,
+              backgroundColor: theme.components?.MuiPaper?.defaultProps?.color,
             }}
           >
             <TableRow
-              component={Paper}
               sx={{
                 color: theme.palette.getContrastText(
                   theme.palette.action.active,

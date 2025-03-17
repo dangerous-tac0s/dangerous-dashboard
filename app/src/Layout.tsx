@@ -103,6 +103,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         maxItems={3}
         separator={<FontAwesomeIcon icon={faChevronRight} />}
         aria-label="breadcrumb"
+        sx={{ marginRight: "1rem" }}
       >
         {text.map((item, i) => (
           <div key={i}>{item}</div>
@@ -120,15 +121,15 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     switch (location.pathname) {
       case "/chart":
         const chipFilters = { ...filters["/chart"].chip };
-        const asButtons = {};
-        Object.keys(filters["/chart"].chip).forEach((key: string) => {
-          asButtons[key] = {
-            onClick: () => {
-              toggleChipFilter(key);
-            },
-            color: chipFilters[key] ? "white" : "gray",
-          };
-        });
+        // const asButtons = {};
+        // Object.keys(filters["/chart"].chip).forEach((key: string) => {
+        //   asButtons[key] = {
+        //     onClick: () => {
+        //       toggleChipFilter(key);
+        //     },
+        //     color: chipFilters[key] ? "white" : "gray",
+        //   };
+        // });
         return (
           <>
             {/*  < container sx={{ flexDirection: "row", flex: 2 }} spacing={2}>*/}
@@ -143,7 +144,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             ) : (
               ""
             )}
-            <Box>
+            <Grid>
               <FormControl sx={{ m: 1, width: 200 }} size={"small"}>
                 <InputLabel id="type-filter-label">Type</InputLabel>
                 <Select
@@ -178,7 +179,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                   )}
                 </Select>
               </FormControl>
-            </Box>
+            </Grid>
             <Grid container alignItems={"center"}>
               <FormControl sx={{ m: 1, width: 200 }} size={"small"}>
                 <InputLabel id="type-filter-label">Period</InputLabel>

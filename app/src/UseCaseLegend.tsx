@@ -113,6 +113,8 @@ export function SplitButton({
   const [dropDownDisabled, setDropDownDisabled] = React.useState(true);
   const [buttonBorder, setButtonBorder] = React.useState(0);
 
+  options = options ?? [];
+
   const handleClick = () => {
     console.info(`You clicked ${options[selectedIndex]}`);
   };
@@ -230,10 +232,14 @@ export function SplitButton({
 }
 
 export const LegendMenu = () => {
+  const elements = makeLegendElements();
   const { filters, toggleChipFilter } = useLayout();
   const chipFilters = filters["/chart"].chip;
 
-  const elements = makeLegendElements();
+  let mod = null;
+  if (name && Object.keys(CHIP_IMPLANT_MAP).includes(name)) {
+    mod = CHIP_IMPLANT_MAP[name]();
+  }
 
   return (
     <Grid
@@ -246,6 +252,7 @@ export const LegendMenu = () => {
     >
       {Object.keys(elements).map((key, i) => (
         <SplitButton
+          key={i}
           icon={
             <Typography
               color={
@@ -259,11 +266,61 @@ export const LegendMenu = () => {
           }
           buttonActive={chipFilters[key]}
           onClickButton={() => toggleChipFilter(key.toLowerCase())}
-          options={["one", "two", "three"]}
+          options={[]}
         />
       ))}
     </Grid>
   );
+};
+
+const LegendPopup = () => {
+  const elements = makeLegendElements();
+
+  const featureMap = { ...elements };
+
+  featureMap["smartphone"]["tooltip"] = "Not Compatible with Smartphones";
+  featureMap["legacy_access_control"]["tooltip"] =
+    "Not Compatible with Legacy Access Control";
+  featureMap["blink"]["tooltip"] = "Doesn't have an LED";
+  featureMap["magic"]["tooltip"] = "Doesn't Support Cloning";
+  featureMap["data_sharing"]["tooltip"] = "Can't Share Data";
+  featureMap["digital_security"]["tooltip"] = "Doesn't Offer Digital Security";
+  featureMap["payment"]["tooltip"] = "Doesn't Support Payment";
+  featureMap["temperature"]["tooltip"] = "Can't Take Temperature";
+
+  // mod.summary.forEach((feature) => {
+  //   if (feature.feature === "Frequency") {
+  //     if (feature.value === "LF" || feature.value === "Dual") {
+  //       featureMap["legacy_access_control"]["color"] = "white";
+  //       featureMap["legacy_access_control"]["tooltip"] =
+  //         "Compatible with Legacy Access Control Systems";
+  //     }
+  //     if (feature.value === "HF" || feature.value === "Dual") {
+  //       featureMap["smartphone"]["color"] = "white";
+  //       featureMap["smartphone"]["tooltip"] = "Smartphone Compatible";
+  //     }
+  //   } else if (feature.feature === "Data Sharing") {
+  //     featureMap["data_sharing"]["color"] = "white";
+  //     featureMap["data_sharing"]["tooltip"] =
+  //       `Data Sharing: ${feature.value}`;
+  //   } else if (feature.feature === "Magic") {
+  //     featureMap["magic"]["color"] = "white";
+  //     featureMap["magic"]["tooltip"] = `Magic: ${feature.value}`;
+  //   } else if (feature.feature === "Temperature") {
+  //     featureMap["temperature"]["color"] = "white";
+  //     featureMap["temperature"]["tooltip"] = "Can Take Temperature";
+  //   } else if (feature.feature === "Digital Security") {
+  //     featureMap["digital_security"]["color"] = "white";
+  //     featureMap["digital_security"]["tooltip"] =
+  //       "Has Digital Security Features";
+  //   } else if (feature.feature === "Blink") {
+  //     featureMap["blink"]["color"] = "white";
+  //     featureMap["blink"]["tooltip"] = feature.value;
+  //   } else if (feature.feature === "Payment") {
+  //     featureMap["payment"]["color"] =
+  //       feature.value === "Yes" ? "white" : "yellow";
+  //     featureMap["payment"]["tooltip"] = feature.value;
+  //   }
 };
 
 const UseCaseLegend = ({
@@ -340,35 +397,35 @@ const UseCaseLegend = ({
     });
     return (
       <Grid
+        component={Paper}
         container
         sx={{
           flexDirection: "row",
-          justifyContent: "center",
+          justifyContent: "space-evenly",
+          flex: 1,
+          backgroundColor: theme.palette.action.selected,
+          py: 2,
         }}
         gap={{ xs: 3, sm: 0 }}
       >
-        <Grid sx={{ xs: 12, md: 6 }} container>
-          {Object.keys(featureMap)
-            .slice(0, 4)
-            .map((e, i) => (
-              <Tooltip key={i} title={featureMap[e].tooltip}>
-                <Stack color={featureMap[e].color ?? "red"} mx={1}>
-                  {featureMap[e].icon}
-                </Stack>
-              </Tooltip>
-            ))}
-        </Grid>{" "}
-        <Grid sx={{ xs: 12, md: 6 }} container>
-          {Object.keys(featureMap)
-            .slice(4)
-            .map((e, i) => (
-              <Tooltip key={i} title={featureMap[e].tooltip}>
-                <Stack color={featureMap[e].color ?? "red"} mx={1}>
-                  {featureMap[e].icon}
-                </Stack>
-              </Tooltip>
-            ))}
-        </Grid>
+        {/*<Grid sx={{ xs: 12, md: 6 }} container>*/}
+        {Object.keys(featureMap).map((e, i) => (
+          <Tooltip key={i} title={featureMap[e].tooltip}>
+            <Stack color={featureMap[e].color ?? "red"} mx={1}>
+              {featureMap[e].icon}
+            </Stack>
+          </Tooltip>
+        ))}
+        {/*{Object.keys(featureMap)*/}
+        {/*  .slice(4)*/}
+        {/*  .map((e, i) => (*/}
+        {/*    <Tooltip key={i} title={featureMap[e].tooltip}>*/}
+        {/*      <Stack color={featureMap[e].color ?? "red"} mx={1}>*/}
+        {/*        {featureMap[e].icon}*/}
+        {/*      </Stack>*/}
+        {/*    </Tooltip>*/}
+        {/*  ))}*/}
+        {/*</Grid>*/}
       </Grid>
     );
   }

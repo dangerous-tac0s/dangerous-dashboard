@@ -25,6 +25,19 @@ export const defaults = {
       temperature: false,
     },
 
+    options: {
+      smartphone: {
+        iso: ["14443a", "14443b", "15693"],
+      },
+      legacy_access_control: [],
+      digital_security: [],
+      data_sharing: [],
+      payment: [],
+      magic: [],
+      blink: [],
+      temperature: [],
+    },
+
     hf: {
       iso15693: false,
       iso14443: false,
