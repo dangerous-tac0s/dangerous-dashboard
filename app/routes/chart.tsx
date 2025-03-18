@@ -1,4 +1,4 @@
-import { Link, useLoaderData, useNavigate } from "@remix-run/react";
+import { useLoaderData, useNavigate } from "@remix-run/react";
 import { useEffect, useState } from "react";
 import { CHIP_IMPLANT_MAP, ChipImplant } from "~/models/chip_implant";
 import { MAGNET_IMPLANT_MAP } from "~/models/magnet_implant";
@@ -17,15 +17,7 @@ import {
   LabelList,
 } from "recharts";
 import { useLayout } from "~/src/LayoutContext";
-import {
-  Grid,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
-} from "@mui/material";
+import { Grid, Paper, Typography } from "@mui/material";
 import theme from "~/src/theme";
 import UseCaseLegend from "~/src/UseCaseLegend";
 
@@ -278,7 +270,6 @@ const Chart = () => {
     active,
     payload,
     label,
-    formatter,
     position,
   }: {
     active: boolean;
@@ -306,65 +297,95 @@ const Chart = () => {
           top: position?.y ?? "50%",
           left: position?.x ?? "50%",
           transform: "translate(-50%, -50%)",
+          flex: 1,
+          justifyContent: "flex-start",
         }}
         component={Paper}
         border={`solid thin ${theme.palette.mode === "dark" ? "black" : "gray"}`}
       >
         {["chip", "xled"].includes(mod.mod_type.toLowerCase()) ? (
-          <UseCaseLegend props={{ name: mod.name }} />
+          <Grid
+            container
+            sx={{ backgroundColor: theme.palette.action.selected }}
+          >
+            <UseCaseLegend props={{ name: mod.name }} />
+          </Grid>
         ) : (
           ""
         )}
-        <Table>
-          <TableHead
+        <Grid
+          container
+          sx={{
+            flex: 1,
+            flexDirection: "row",
+            alignItems: "center",
+            m: "1rem",
+          }}
+        >
+          <Grid
+            columns={4}
             sx={{
-              backgroundColor: theme.components?.MuiPaper?.defaultProps?.color,
+              flex: 1.5,
+              m: 0,
             }}
+            container
           >
-            <TableRow
-              sx={{
-                color: theme.palette.getContrastText(
-                  theme.palette.action.active,
-                ),
-              }}
-            >
-              <TableCell>{label}</TableCell>
-              <TableCell>
-                {payload.map((entry) =>
-                  floatToLocalizedPercentage(entry.value),
-                )}
-              </TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody
+            <Typography color={"white"}>{label}</Typography>
+          </Grid>
+          <Grid
             sx={{
-              backgroundColor: theme.palette.action.selected,
+              flex: 2,
+              m: 0,
             }}
+            container
           >
-            <TableRow>
-              <TableCell component="th" scope="row">
-                Type:
-              </TableCell>
-              <TableCell>{mod.mod_type}</TableCell>
-            </TableRow>
-            {mod.summary.map(
-              (ele: { feature: string; value: string }, i: number) => (
-                <TableRow key={i}>
-                  <TableCell
-                    component="th"
-                    scope="row"
-                    style={{ display: "flex", alignItems: "flex-start" }}
+            <Typography color={"white"}>
+              {payload.map((entry) => floatToLocalizedPercentage(entry.value))}
+            </Typography>
+          </Grid>
+        </Grid>
+        <Grid
+          container
+          flexDirection={"column"}
+          justifyContent={"flex-start"}
+          sx={{ backgroundColor: theme.palette.action.selected }}
+        >
+          {mod.summary.map(
+            (ele: { feature: string; value: string }, i: number) => (
+              <Grid
+                key={i}
+                sx={{ m: 0, p: 0, borderBottom: "1px solid gray" }}
+                container
+              >
+                <Grid
+                  sx={{
+                    mx: "1.5rem",
+                    my: "1rem",
+                    flex: 1,
+                  }}
+                >
+                  <Typography variant={"caption"} color={"white"}>
+                    {ele.feature.replace(/\n$/, "")}
+                  </Typography>
+                </Grid>
+                <Grid
+                  sx={{
+                    mx: "1.25rem",
+                    my: "1rem",
+                  }}
+                >
+                  <Typography
+                    variant={"caption"}
+                    color={"white"}
+                    whiteSpace={"pre-line"}
                   >
-                    {ele.feature}:&nbsp;
-                  </TableCell>
-                  <TableCell style={{ whiteSpace: "pre-line" }}>
-                    {ele.value}
-                  </TableCell>
-                </TableRow>
-              ),
-            )}
-          </TableBody>
-        </Table>
+                    {ele.value.replace(/\n$/, "")}
+                  </Typography>
+                </Grid>
+              </Grid>
+            ),
+          )}
+        </Grid>
       </Grid>
     ) : (
       ""

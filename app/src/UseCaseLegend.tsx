@@ -18,17 +18,12 @@ import { faLightbulb } from "@fortawesome/pro-light-svg-icons/faLightbulb";
 import { faCopy } from "@fortawesome/pro-light-svg-icons/faCopy";
 import { faCreditCard } from "@fortawesome/pro-light-svg-icons/faCreditCard";
 import { faMobileSignal } from "@fortawesome/pro-light-svg-icons/faMobileSignal";
-import {
-  CHIP_IMPLANT_MAP,
-  ChipImplant,
-  ChipImplantInterface,
-} from "~/models/chip_implant";
+import { CHIP_IMPLANT_MAP } from "~/models/chip_implant";
 import { faThermometer } from "@fortawesome/pro-light-svg-icons/faThermometer";
 import { faShareFromSquare } from "@fortawesome/pro-light-svg-icons/faShareFromSquare";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import theme from "~/src/theme";
-import Box from "@mui/material/Box";
 import { useLayout } from "~/src/LayoutContext";
 import React, { useEffect } from "react";
 import { faArrowDown } from "@fortawesome/pro-regular-svg-icons";
@@ -397,13 +392,11 @@ const UseCaseLegend = ({
     });
     return (
       <Grid
-        component={Paper}
         container
         sx={{
           flexDirection: "row",
           justifyContent: "space-evenly",
           flex: 1,
-          backgroundColor: theme.palette.action.selected,
           py: 2,
         }}
         gap={{ xs: 3, sm: 0 }}
