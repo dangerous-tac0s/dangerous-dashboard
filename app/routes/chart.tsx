@@ -398,22 +398,22 @@ const Chart = () => {
     const approxCharWidth = 12; // approximate width per character in pixels
     const textWidth = text.length * approxCharWidth - 1 + 3;
     const rectWidth = textWidth + padding * 2 + 3;
-    const rectHeight = 35; // fixed height for the box
+    const rectHeight = 32; // fixed height for the box
 
     // Position the label just beyond the bar's end.
     let labelX = x + width + 18;
     // Unless the bar is over half the max
     if (data[index].direct > 0.5 * maxValue) {
       // Then display it in the bar near the end.
-      labelX = labelX - 2 * textWidth + 2 * padding;
+      labelX = labelX - 2 * textWidth + 2 * padding - 1;
     }
 
-    let labelY = y + height - rectHeight + 3;
+    let labelY = y + height - rectHeight + 1;
     return (
       <g>
         <rect
           x={labelX}
-          y={labelY - 5}
+          y={labelY - 4}
           width={rectWidth}
           height={rectHeight}
           fill="#1F1F1F"
@@ -423,6 +423,7 @@ const Chart = () => {
           ry={3}
         />
         <text
+          fontSize={"18pt"}
           x={labelX + padding}
           y={labelY + rectHeight / 2 + 5}
           textAnchor="start"

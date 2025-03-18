@@ -27,20 +27,18 @@ export const defaults = {
 
     options: {
       smartphone: {
-        iso: ["14443a", "14443b", "15693"],
+        iso: [], // "14443a", "14443b", "15693"
       },
-      legacy_access_control: [],
-      digital_security: [],
-      data_sharing: [],
-      payment: [],
-      magic: [],
-      blink: [],
-      temperature: [],
-    },
-
-    hf: {
-      iso15693: false,
-      iso14443: false,
+      legacy_access_control: {},
+      digital_security: {},
+      data_sharing: {
+        ndef: [], // Container size
+        spark: false,
+      },
+      payment: { enabled: "bool" },
+      magic: { chip: [] },
+      blink: { color: [] },
+      temperature: {},
     },
 
     type: [
