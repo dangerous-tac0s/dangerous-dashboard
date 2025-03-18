@@ -484,6 +484,7 @@ const Chart = () => {
             setPreviousClick(null);
             setTooltipVisible(false);
           }}
+          barSize={38}
         >
           {data.map((entry, index) => (
             <Cell key={index} fill={colorMap[entry.product]} />
