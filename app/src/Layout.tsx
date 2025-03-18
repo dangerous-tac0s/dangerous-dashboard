@@ -19,23 +19,20 @@ import {
   Paper,
   FormControl,
   InputLabel,
-  IconButton,
 } from "@mui/material";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useLocation, Link } from "@remix-run/react";
 import { faChevronRight } from "@fortawesome/pro-regular-svg-icons";
-import { faCalendar } from "@fortawesome/pro-regular-svg-icons/faCalendar";
 import { faGear } from "@fortawesome/pro-regular-svg-icons/faGear";
 import { useLayout } from "./LayoutContext"; // Import LayoutContext
 import { defaults } from "./LayoutContext";
-import theme from "~/src/theme";
 import { faChartSimpleHorizontal } from "@fortawesome/pro-regular-svg-icons/faChartSimpleHorizontal";
 import { faMagnifyingGlass } from "@fortawesome/pro-regular-svg-icons/faMagnifyingGlass";
 import { faMagnet } from "@fortawesome/pro-light-svg-icons/faMagnet";
 import { faMicrochip } from "@fortawesome/pro-light-svg-icons/faMicrochip";
-import UseCaseLegend, { LegendMenu } from "~/src/UseCaseLegend";
+import { LegendMenu } from "~/src/UseCaseLegend";
 
 const navItems = [
   // { name: "About", route: "/about" },
@@ -332,6 +329,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         flex={1}
         alignItems="center"
         pb={10}
+        ml={location.pathname === "/chart" ? -10 : 0}
       >
         {children}
       </Grid>

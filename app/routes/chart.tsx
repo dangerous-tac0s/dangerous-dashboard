@@ -405,7 +405,7 @@ const Chart = () => {
 
     // Position the label just beyond the bar's end.
     const labelX = x + width + 15;
-    const labelY = y + height - rectHeight + 4;
+    let labelY = y + height - rectHeight + 4;
     return (
       <g>
         {/* Background box */}
@@ -423,7 +423,7 @@ const Chart = () => {
         {/* Text label */}
         <text
           x={labelX + padding}
-          y={labelY + rectHeight / 2 + 5} // adjust the 5 offset to fine-tune vertical centering
+          y={labelY + rectHeight / 2 + 5}
           textAnchor="start"
           fill="gray"
         >
