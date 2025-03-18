@@ -1,4 +1,3 @@
-import Box from "@mui/material/Box";
 import { useLoaderData, useNavigate } from "@remix-run/react";
 import { useEffect, useState } from "react";
 import { CHIP_IMPLANT_MAP, ChipImplant } from "~/models/chip_implant";
@@ -15,6 +14,7 @@ import {
   XAxis,
   YAxis,
   Tooltip,
+  LabelList,
 } from "recharts";
 import { useLayout } from "~/src/LayoutContext";
 import {
@@ -311,14 +311,8 @@ const Chart = () => {
         border={`solid thin ${theme.palette.mode === "dark" ? "black" : "gray"}`}
       >
         {["chip", "xled"].includes(mod.mod_type.toLowerCase()) ? (
-          // <Grid
-          //   container
-          //   component={Paper}
-          //   sx={{ backgroundColor: theme.palette.action.selected, py: 2 }}
-          // >
           <UseCaseLegend props={{ name: mod.name }} />
         ) : (
-          // </Grid>
           ""
         )}
         <Table>
@@ -398,6 +392,47 @@ const Chart = () => {
   const minHeight = 300;
   const chartHeight = Math.max(data.length * barHeight, minHeight);
 
+  const renderCustomLabel = (props) => {
+    const { x, y, width, height, index } = props;
+    const text = floatToLocalizedPercentage(data[index].direct);
+
+    // Estimate text dimensions: adjust these values as needed.
+    const padding = 10;
+    const approxCharWidth = 12; // approximate width per character in pixels
+    const textWidth = text.length * approxCharWidth - 1 + 3;
+    const rectWidth = textWidth + padding * 2 + 3;
+    const rectHeight = 35; // fixed height for the box
+
+    // Position the label just beyond the bar's end.
+    const labelX = x + width + 15;
+    const labelY = y + height - rectHeight + 4;
+    return (
+      <g>
+        {/* Background box */}
+        <rect
+          x={labelX + 3}
+          y={labelY - 5}
+          width={rectWidth}
+          height={rectHeight}
+          fill="#1F1F1F"
+          stroke="lightgray"
+          strokeWidth={1}
+          rx={3} // optional: rounded corners
+          ry={3}
+        />
+        {/* Text label */}
+        <text
+          x={labelX + padding}
+          y={labelY + rectHeight / 2 + 5} // adjust the 5 offset to fine-tune vertical centering
+          textAnchor="start"
+          fill="gray"
+        >
+          {text}
+        </text>
+      </g>
+    );
+  };
+
   return (
     <ResponsiveContainer width="100%" height={chartHeight}>
       <BarChart
@@ -408,8 +443,11 @@ const Chart = () => {
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis
           type="number"
-          tickFormatter={floatToLocalizedPercentage} // X-axis now represents values
+          tickFormatter={floatToLocalizedPercentage}
+          orientation="top"
+          tickLine={false}
         />
+        {/* We need to make "DT Payment Conversion" a manageable length and then adjust its position */}
         <YAxis
           type="category"
           dataKey="product" // Y-axis now represents categories
@@ -417,7 +455,7 @@ const Chart = () => {
             <text
               x={x}
               y={y}
-              dy={4}
+              dy={payload.value.slice(3, 6).toLowerCase() === "pay" ? -8 : 4}
               fontSize={18}
               textAnchor="end"
               fill="#666"
@@ -448,6 +486,8 @@ const Chart = () => {
           {data.map((entry, index) => (
             <Cell key={index} fill={colorMap[entry.product]} />
           ))}
+
+          <LabelList dataKey="percentage" content={renderCustomLabel} />
         </Bar>
       </BarChart>
     </ResponsiveContainer>
