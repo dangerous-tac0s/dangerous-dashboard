@@ -384,19 +384,18 @@ const Chart = () => {
     setColorMap(colorMap);
   }, []);
 
-  // useEffect(() => {
-  //   console.log(filters);
-  // }, [filters]);
-
   const barHeight = 50;
   const minHeight = 300;
   const chartHeight = Math.max(data.length * barHeight, minHeight);
 
-  const renderCustomLabel = (props) => {
+  const renderCustomLabel = (
+    props,
+  ): { x: number; y: number; height: number; index: number } => {
     const { x, y, width, height, index } = props;
     const text = floatToLocalizedPercentage(data[index].direct);
 
-    // Estimate text dimensions: adjust these values as needed.
+    const maxValue = Math.max(...data.map((ea) => ea.direct));
+
     const padding = 10;
     const approxCharWidth = 12; // approximate width per character in pixels
     const textWidth = text.length * approxCharWidth - 1 + 3;
@@ -404,23 +403,27 @@ const Chart = () => {
     const rectHeight = 35; // fixed height for the box
 
     // Position the label just beyond the bar's end.
-    const labelX = x + width + 15;
-    let labelY = y + height - rectHeight + 4;
+    let labelX = x + width + 18;
+    // Unless the bar is over half the max
+    if (data[index].direct > 0.5 * maxValue) {
+      // Then display it in the bar near the end.
+      labelX = labelX - 2 * textWidth + 2 * padding;
+    }
+
+    let labelY = y + height - rectHeight + 3;
     return (
       <g>
-        {/* Background box */}
         <rect
-          x={labelX + 3}
+          x={labelX}
           y={labelY - 5}
           width={rectWidth}
           height={rectHeight}
           fill="#1F1F1F"
           stroke="lightgray"
           strokeWidth={1}
-          rx={3} // optional: rounded corners
+          rx={3}
           ry={3}
         />
-        {/* Text label */}
         <text
           x={labelX + padding}
           y={labelY + rectHeight / 2 + 5}
