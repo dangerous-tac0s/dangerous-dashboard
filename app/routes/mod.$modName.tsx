@@ -58,9 +58,6 @@ export async function loader({ params }: { params: { modName: string } }) {
   if (!modName) {
     throw new Response("Mod name param missing", { status: 400 });
   }
-  if (modName === "installMap.js") {
-    return;
-  }
 
   return json({ modName, rawData });
 }
@@ -128,20 +125,6 @@ export function ModDetailRoute() {
           ) : (
             ""
           )}
-          {/*<Box sx={{ position: "relative", width: 500, height: 550 }}>*/}
-          {/*  <Box*/}
-          {/*    component={Paper}*/}
-          {/*    display={{ xs: "none", lg: "block" }}*/}
-          {/*    sx={{*/}
-          {/*      width: "100%",*/}
-          {/*      height: "100%",*/}
-          {/*      clipPath:*/}
-          {/*        "polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)",*/}
-          {/*      display: "flex",*/}
-          {/*      alignItems: "center",*/}
-          {/*      justifyContent: "center",*/}
-          {/*    }}*/}
-          {/*  >*/}
           <Box component={Paper} sx={{ p: 3, borderRadius: 3 }}>
             <Typography variant={"h5"}> Coming Soon™</Typography>
             <List className={"list-disc pl-10"}>

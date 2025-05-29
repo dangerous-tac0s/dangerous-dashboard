@@ -1,4 +1,4 @@
-import { useLoaderData, useNavigate } from "@remix-run/react";
+import { useLoaderData, useNavigate, useSearchParams } from "@remix-run/react";
 import { useEffect, useState } from "react";
 import { CHIP_IMPLANT_MAP, ChipImplant } from "~/models/chip_implant";
 import { MAGNET_IMPLANT_MAP } from "~/models/magnet_implant";
@@ -16,10 +16,10 @@ import {
   Tooltip,
   LabelList,
 } from "recharts";
-import { useLayout } from "~/src/LayoutContext";
-import { Grid, Paper, Typography } from "@mui/material";
+import { Container, Grid, Paper, Typography } from "@mui/material";
 import theme from "~/src/theme";
 import UseCaseLegend from "~/src/UseCaseLegend";
+import Box from "@mui/material/Box";
 
 // Vaguely colorblind safe
 export const colorPalette45: string[] = [
@@ -177,22 +177,21 @@ type ChartDataItem = {
 const Chart = () => {
   const navigate = useNavigate();
   const dataObj = useLoaderData<DataSet>();
-  // const [mode, setMode] = useState("overall");
   const [colorMap, setColorMap] = useState<{ [key: string]: string }>({});
   const [ALL_MODS, setAll_MODS] = useState<Record<
     string,
     () => ModInterface
   > | null>(null);
-  const { filters } = useLayout();
   const [tooltipVisible, setTooltipVisible] = useState(false);
   const [previousClick, setPreviousClick] = useState<string | null>(null);
 
-  const mode =
-    Object.keys(filters).length > 0
-      ? filters["/chart"]["period"].find(
-          (p: { name: string; active: boolean }) => p.active,
-        ).name
-      : "overall";
+  const [searchParams, _] = useSearchParams({
+    type: ["chips", "magnets"],
+    period: "overall",
+    chip: [],
+  });
+
+  const mode = searchParams.get("period") ?? "overall";
 
   // A single handler for all bars
   const handleBarClick = (dataItem: ChartDataItem) => {
@@ -213,9 +212,8 @@ const Chart = () => {
     data: { product: string; direct: number }[],
   ): { product: string; direct: number }[] => {
     // Type Filter
-    const active = filters["/chart"]["type"]
-      .filter((t: { name: string; active: boolean }) => t.active)
-      .map((t: { name: string; action: boolean }) => t.name);
+    const active = searchParams.getAll("type") ?? ["chips", "magnets"];
+    console.log("active", active[0]);
     let updated = [...data];
     if (active.length === 0) {
       return [];
@@ -239,20 +237,17 @@ const Chart = () => {
 
     // Chip
     if (active.length === 1 && active.some((item) => item === "chips")) {
-      const chipFilters = { ...filters["/chart"].chip };
+      const chipFilters = searchParams.getAll("chip") ?? [];
 
       // At least one chip filter is in use
-      if (Object.values(chipFilters).some((item) => item)) {
+      if (chipFilters.length > 0) {
         // Get our active chip filters
-        const activeChipFilters = Object.entries(chipFilters)
-          .filter(([_name, active]) => active)
-          .map(([name, _active]) => name);
 
         updated = updated.filter((item) =>
-          activeChipFilters.every((f) => {
-            const chipImplant: ChipImplant = CHIP_IMPLANT_MAP[item.product]();
+          chipFilters.every((f) => {
+            const chipImplant: ModInterface = CHIP_IMPLANT_MAP[item.product]();
             // console.log(chipImplant.options);
-            return chipImplant.features[f].supported;
+            return chipImplant.features[f]?.supported;
           }),
         );
       }
@@ -458,62 +453,75 @@ const Chart = () => {
 
   return (
     <ResponsiveContainer width="100%" height={chartHeight}>
-      <BarChart
-        layout="vertical" // Make it horizontal
-        data={data}
-        margin={{ top: 20, right: 50, left: 0, bottom: 20 }} // Adjust for long labels
-      >
-        <CartesianGrid strokeDasharray="3 3" />
-        <XAxis
-          type="number"
-          tickFormatter={floatToLocalizedPercentage}
-          orientation="top"
-          tickLine={false}
-        />
-        {/* We need to make "DT Payment Conversion" a manageable length and then adjust its position */}
-        <YAxis
-          type="category"
-          dataKey="product" // Y-axis now represents categories
-          tick={({ payload, x, y }) => (
-            <text
-              x={x}
-              y={y}
-              dy={payload.value.slice(3, 6).toLowerCase() === "pay" ? -8 : 4}
-              fontSize={18}
-              textAnchor="end"
-              fill="#666"
-              style={{ whiteSpace: "pre-line" }}
-            >
-              {/* Trim the labels to reduce the width... Slightly. */}
-              {payload.value
-                .replace(/^(DT|VivoKey)\W/, "")
-                .replace(/Payment\WConversion/, "Payment\nConversion")}
-            </text>
-          )}
-          width={200}
-          interval={0}
-        />
-        {/* @ts-expect-error BarChat is passing params to the tooltip*/}
-        <Tooltip content={<CustomTooltip />} />
-        <Bar
-          dataKey="direct"
-          onClick={handleBarClick}
-          onMouseEnter={() => {
-            setTooltipVisible(true);
-          }}
-          onMouseLeave={() => {
-            setPreviousClick(null);
-            setTooltipVisible(false);
-          }}
-          barSize={38}
+      {data.length > 0 ? (
+        <BarChart
+          layout="vertical" // Make it horizontal
+          data={data}
+          margin={{ top: 20, right: 50, left: -80, bottom: 20 }} // Adjust for long labels
         >
-          {data.map((entry, index) => (
-            <Cell key={index} fill={colorMap[entry.product]} />
-          ))}
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis
+            type="number"
+            tickFormatter={floatToLocalizedPercentage}
+            orientation="top"
+            tickLine={false}
+          />
+          {/* We need to make "DT Payment Conversion" a manageable length and then adjust its position */}
+          <YAxis
+            type="category"
+            dataKey="product"
+            tick={({ payload, x, y }) => (
+              <text
+                x={x}
+                y={y}
+                dy={payload.value.slice(3, 6).toLowerCase() === "pay" ? -8 : 4}
+                fontSize={18}
+                textAnchor="end"
+                fill="#666"
+                style={{ whiteSpace: "pre-line" }}
+              >
+                {/* Trim the labels to reduce the width... Slightly. */}
+                {payload.value
+                  .replace(/^(DT|VivoKey)\W/, "")
+                  .replace(/Payment\WConversion/, "Pay Conv")}
+              </text>
+            )}
+            width={200}
+            interval={0}
+          />
+          {/* @ts-expect-error BarChat is passing params to the tooltip*/}
+          <Tooltip content={<CustomTooltip />} />
+          <Bar
+            dataKey="direct"
+            onClick={handleBarClick}
+            onMouseEnter={() => {
+              setTooltipVisible(true);
+            }}
+            onMouseLeave={() => {
+              setPreviousClick(null);
+              setTooltipVisible(false);
+            }}
+            barSize={38}
+          >
+            {data.map((entry, index) => (
+              <Cell key={index} fill={colorMap[entry.product]} />
+            ))}
 
-          <LabelList dataKey="percentage" content={renderCustomLabel} />
-        </Bar>
-      </BarChart>
+            <LabelList dataKey="percentage" content={renderCustomLabel} />
+          </Bar>
+        </BarChart>
+      ) : (
+        <Box
+          sx={{
+            display: "flex",
+            maxWidth: "99vw",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          Nothing found. Adjust filters.
+        </Box>
+      )}
     </ResponsiveContainer>
   );
 };

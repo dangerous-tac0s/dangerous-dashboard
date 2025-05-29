@@ -17,7 +17,6 @@ import theme from "./src/theme";
 import ClientStyleContext from "./src/ClientStyleContext";
 import Layout from "./src/Layout";
 import { createContext, useContext } from "react";
-import { LayoutProvider } from "~/src/LayoutContext";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faWarning } from "@fortawesome/pro-regular-svg-icons/faWarning";
 
@@ -85,11 +84,9 @@ const Document = withEmotionCache(
 export default function App() {
   return (
     <Document>
-      <LayoutProvider>
-        <Layout>
-          <Outlet />
-        </Layout>
-      </LayoutProvider>
+      <Layout>
+        <Outlet />
+      </Layout>
     </Document>
   );
 }

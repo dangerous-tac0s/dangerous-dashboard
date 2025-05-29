@@ -24,9 +24,9 @@ import { faShareFromSquare } from "@fortawesome/pro-light-svg-icons/faShareFromS
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import theme from "~/src/theme";
-import { useLayout } from "~/src/LayoutContext";
 import React, { useEffect } from "react";
 import { faArrowDown } from "@fortawesome/pro-regular-svg-icons";
+import { useSearchParams } from "@remix-run/react";
 
 const makeLegendElements = (): {
   [key: string]: {
@@ -227,14 +227,35 @@ export function SplitButton({
 }
 
 export const LegendMenu = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const elements = makeLegendElements();
-  const { filters, toggleChipFilter } = useLayout();
-  const chipFilters = filters["/chart"].chip;
+  const chipFilters = searchParams.getAll("chip");
 
-  let mod = null;
-  if (name && Object.keys(CHIP_IMPLANT_MAP).includes(name)) {
-    mod = CHIP_IMPLANT_MAP[name]();
-  }
+  // let mod = null;
+  // if (name && Object.keys(CHIP_IMPLANT_MAP).includes(name)) {
+  //   mod = CHIP_IMPLANT_MAP[name]();
+  // }
+
+  const toggleChipFilter = (chipName: string) => {
+    console.log(chipFilters);
+    if (chipFilters.includes(chipName)) {
+      setSearchParams(
+        (prev) => {
+          prev.delete("chip", chipName);
+          return prev;
+        },
+        { replace: true },
+      );
+    } else {
+      setSearchParams(
+        (prev) => {
+          prev.append("chip", chipName);
+          return prev;
+        },
+        { replace: true },
+      );
+    }
+  };
 
   return (
     <Grid
@@ -251,7 +272,7 @@ export const LegendMenu = () => {
           icon={
             <Typography
               color={
-                chipFilters[key.toLowerCase()]
+                chipFilters.includes(key)
                   ? theme.palette.action.active
                   : theme.palette.action.disabled
               }
@@ -259,8 +280,8 @@ export const LegendMenu = () => {
               {elements[key].icon}
             </Typography>
           }
-          buttonActive={chipFilters[key]}
-          onClickButton={() => toggleChipFilter(key.toLowerCase())}
+          buttonActive={() => chipFilters.includes(key)}
+          onClickButton={() => toggleChipFilter(key)}
           options={[]}
         />
       ))}
