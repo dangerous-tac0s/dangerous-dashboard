@@ -9,6 +9,7 @@ import {
   Paper,
   Popper,
   Tooltip,
+  TypographyTypeMap,
 } from "@mui/material";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Stack } from "@mui/system";
@@ -24,9 +25,10 @@ import { faShareFromSquare } from "@fortawesome/pro-light-svg-icons/faShareFromS
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import theme from "~/src/theme";
-import React, { useEffect } from "react";
+import React, { ReactElement, useEffect } from "react";
 import { faArrowDown } from "@fortawesome/pro-regular-svg-icons";
 import { useSearchParams } from "@remix-run/react";
+import { OverridableComponent } from "@mui/types";
 
 const makeLegendElements = (): {
   [key: string]: {
@@ -97,6 +99,12 @@ export function SplitButton({
   buttonActive,
   onOptionClick,
   options,
+}: {
+  icon: ReactElement;
+  onClickButton: (event: React.MouseEvent<HTMLElement>) => void;
+  buttonActive: boolean;
+  onOptionClick?: (event: React.MouseEvent<HTMLElement>) => void;
+  options?: any[];
 }) {
   const [open, setOpen] = React.useState(false);
   const anchorRef = React.useRef<HTMLDivElement>(null);
@@ -159,6 +167,7 @@ export function SplitButton({
   return (
     <React.Fragment>
       <ButtonGroup
+        // @ts-expect-error it works : )
         color={theme.palette.primary.dark}
         ref={anchorRef}
         aria-label="Button group with a nested menu"
@@ -280,7 +289,7 @@ export const LegendMenu = () => {
               {elements[key].icon}
             </Typography>
           }
-          buttonActive={() => chipFilters.includes(key)}
+          buttonActive={(() => chipFilters.includes(key)) as unknown as boolean}
           onClickButton={() => toggleChipFilter(key)}
           options={[]}
         />
@@ -344,7 +353,7 @@ const UseCaseLegend = ({
 }: {
   props?: {
     name?: string;
-    asButtons: { [key: string]: { onClick: any; color: string } };
+    asButtons?: { [key: string]: { onClick: any; color: string } };
   };
 }) => {
   let mod = null;
@@ -360,6 +369,7 @@ const UseCaseLegend = ({
       icon: any;
       color: null | string;
       tooltip: null | string;
+      onClick?: (event: React.MouseEvent<HTMLElement>) => void;
     };
   } = makeLegendElements();
 
@@ -445,8 +455,14 @@ const UseCaseLegend = ({
   }
   if (props && Object.hasOwn(props, "asButtons")) {
     Object.keys(elements).forEach((key) => {
-      elements[key]["onClick"] = props["asButtons"][key].onClick;
-      elements[key]["color"] = props["asButtons"][key].color;
+      // @ts-expect-error we just checked, it exists
+      elements[key]["onClick"] = props["asButtons"][key].onClick as unknown as
+        | ((event: React.MouseEvent<HTMLElement, MouseEvent>) => void)
+        | undefined;
+      // @ts-expect-error we just checked, it exists
+      elements[key]["color"] = props["asButtons"][key].color as unknown as
+        | ((event: React.MouseEvent<HTMLElement, MouseEvent>) => void)
+        | undefined;
     });
   }
   return (

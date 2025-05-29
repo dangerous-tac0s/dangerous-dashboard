@@ -19,6 +19,7 @@ import {
   Paper,
   FormControl,
   InputLabel,
+  SelectChangeEvent,
 } from "@mui/material";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
@@ -134,24 +135,22 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       }
     };
 
-    const handlePeriodChange = (event) => {
-      searchParams.set("period", event.target.value);
+    const handlePeriodChange = (event: SelectChangeEvent<string>) => {
+      searchParams.set("period", event.target?.value ?? "overall");
 
       setSearchParams(searchParams);
     };
 
-    const toggleTypeFilter = (event) => {
+    const toggleTypeFilter = (event: SelectChangeEvent<string[]>) => {
       event.preventDefault();
-      console.log("filter", event.target.value);
-      const type = event.target.value;
 
-      if (type.length === 0 || type.length === types.length) {
-        searchParams.delete("type");
-      } else {
-        searchParams.delete("type");
-        for (let t in type) {
-          searchParams.append("type", type[t]);
-        }
+      const type = event.target?.value ?? [];
+      searchParams.delete("type");
+
+      if (type.length === 1) {
+        searchParams.set("type", type[0]);
+      } else if (type.length > 1) {
+        searchParams.set("type", type[1]);
       }
 
       setSearchParams(searchParams);
@@ -159,19 +158,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
     switch (path) {
       case "/chart":
-        // const chipFilters = searchParams.getAll("chip");
-        // const chipFilters = { ...filters.chip };
-        // const asButtons = {};
-        // Object.keys(filters["/chart"].chip).forEach((key: string) => {
-        // chipFilters.forEach((key: string) => {
-        //   console.log("layout", key);
-        //   asButtons[key] = {
-        //     onClick: () => {
-        //       toggleChipFilter(key);
-        //     },
-        //     color: chipFilters ? "white" : "gray",
-        //   };
-        // });
         let typeFilters: string[] = [];
 
         if (searchParams.has("type")) {
@@ -211,6 +197,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                     id="type-filter"
                     multiple
                     value={typeFilters}
+                    name={"type"}
                     onChange={toggleTypeFilter}
                     input={<OutlinedInput label="Type" />}
                   >
@@ -237,20 +224,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                     value={period}
                     defaultValue={"overall"}
                     onChange={handlePeriodChange}
-                    // onChange={(e) => {
-                    //   setFilters((prev: any) => ({
-                    //     ...prev,
-                    //     [location.pathname]: {
-                    //       ...filters[location.pathname],
-                    //       period: [
-                    //         ...defaults["/chart"]["period"].map((p) => ({
-                    //           name: p.name,
-                    //           active: p.name === e.target.value,
-                    //         })),
-                    //       ],
-                    //     },
-                    //   }));
-                    // }}
                     sx={{
                       pr: 2,
                       py: 0,
@@ -258,7 +231,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                     input={<OutlinedInput label="Type" />}
                   >
                     {periods.map((period, i: number) => (
-                      <MenuItem key={i} value={period} selected={period}>
+                      <MenuItem
+                        key={i}
+                        value={period}
+                        selected={period === period}
+                      >
                         {period[0].toUpperCase() + period.slice(1)}
                       </MenuItem>
                     ))}
@@ -323,7 +300,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           {/* TODO: Switch to hamburger menu on small screens*/}
           <Box
             sx={{
-              display: { xs: "none", md: "flex" },
+              display: "flex",
               flexGrow: 1,
               justifyContent: "flex-end",
             }}

@@ -1,6 +1,6 @@
 import { useLoaderData, useNavigate, useSearchParams } from "@remix-run/react";
 import { useEffect, useState } from "react";
-import { CHIP_IMPLANT_MAP, ChipImplant } from "~/models/chip_implant";
+import { CHIP_IMPLANT_MAP } from "~/models/chip_implant";
 import { MAGNET_IMPLANT_MAP } from "~/models/magnet_implant";
 import { ModInterface } from "~/models/mod";
 import { json, MetaFunction } from "@remix-run/node";
@@ -16,7 +16,7 @@ import {
   Tooltip,
   LabelList,
 } from "recharts";
-import { Container, Grid, Paper, Typography } from "@mui/material";
+import { Grid, Paper, Typography } from "@mui/material";
 import theme from "~/src/theme";
 import UseCaseLegend from "~/src/UseCaseLegend";
 import Box from "@mui/material/Box";
@@ -77,32 +77,6 @@ interface DataSubset {
 
 export interface DataSet {
   [key: string]: DataSubset;
-}
-
-export function numberToLocalizedNumber(value: string) {
-  const userLocale =
-    navigator.languages && navigator.languages.length
-      ? navigator.languages[0]
-      : navigator.language;
-
-  // Extract the first number from the string (handles decimals)
-  const match = value.match(/[\d,.]+/);
-  if (!match) return value; // Return original if no number is found
-
-  const numberString = match[0];
-
-  // Normalize number (handle different formats like "1,234.56" or "1.234,56")
-  const normalizedNumber = parseFloat(numberString.replace(/,/g, ""));
-
-  if (isNaN(normalizedNumber)) return value; // Return original if parsing fails
-
-  // Format number based on locale
-  const formattedNumber = new Intl.NumberFormat(userLocale).format(
-    normalizedNumber,
-  );
-
-  // Replace the original number in the string with the formatted one
-  return value.replace(numberString, formattedNumber);
 }
 
 export function floatToLocalizedPercentage(value: number, decimals = 2) {
@@ -213,7 +187,7 @@ const Chart = () => {
   ): { product: string; direct: number }[] => {
     // Type Filter
     const active = searchParams.getAll("type") ?? ["chips", "magnets"];
-    console.log("active", active[0]);
+
     let updated = [...data];
     if (active.length === 0) {
       return [];
@@ -246,7 +220,7 @@ const Chart = () => {
         updated = updated.filter((item) =>
           chipFilters.every((f) => {
             const chipImplant: ModInterface = CHIP_IMPLANT_MAP[item.product]();
-            // console.log(chipImplant.options);
+
             return chipImplant.features[f]?.supported;
           }),
         );
@@ -402,9 +376,13 @@ const Chart = () => {
   const minHeight = 300;
   const chartHeight = Math.max(data.length * barHeight, minHeight);
 
-  const renderCustomLabel = (
-    props,
-  ): { x: number; y: number; height: number; index: number } => {
+  const renderCustomLabel = (props: {
+    x: number;
+    y: number;
+    height: number;
+    width: number;
+    index: number;
+  }) => {
     const { x, y, width, height, index } = props;
     const text = floatToLocalizedPercentage(data[index].direct);
 
@@ -506,7 +484,7 @@ const Chart = () => {
             {data.map((entry, index) => (
               <Cell key={index} fill={colorMap[entry.product]} />
             ))}
-
+            {/* @ts-expect-error */}
             <LabelList dataKey="percentage" content={renderCustomLabel} />
           </Bar>
         </BarChart>

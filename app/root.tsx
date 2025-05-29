@@ -8,7 +8,6 @@ import {
   ScrollRestoration,
   useRouteError,
   isRouteErrorResponse,
-  useLoaderData,
   Link,
 } from "@remix-run/react";
 import { withEmotionCache } from "@emotion/react";
@@ -16,7 +15,6 @@ import { unstable_useEnhancedEffect as useEnhancedEffect } from "@mui/material";
 import theme from "./src/theme";
 import ClientStyleContext from "./src/ClientStyleContext";
 import Layout from "./src/Layout";
-import { createContext, useContext } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faWarning } from "@fortawesome/pro-regular-svg-icons/faWarning";
 
