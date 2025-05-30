@@ -17,6 +17,7 @@ import ClientStyleContext from "./src/ClientStyleContext";
 import Layout from "./src/Layout";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faWarning } from "@fortawesome/pro-regular-svg-icons/faWarning";
+import { Analytics } from "@vercel/analytics/remix";
 
 interface DocumentProps {
   children: React.ReactNode;
@@ -151,6 +152,7 @@ export function ErrorBoundary() {
               <Link to={"/"}>Wanna go home?</Link>
             </div>
           </div>
+          <Analytics />
         </Layout>
       </Document>
     );
