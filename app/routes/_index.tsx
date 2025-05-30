@@ -1,9 +1,6 @@
 import * as React from "react";
 import type { MetaFunction } from "@remix-run/node";
-import { Link as RemixLink } from "@remix-run/react";
 import Typography from "@mui/material/Typography";
-import Link from "@mui/material/Link";
-import Box from "@mui/material/Box";
 import { Grid } from "@mui/material";
 
 // https://remix.run/docs/en/main/route/meta
