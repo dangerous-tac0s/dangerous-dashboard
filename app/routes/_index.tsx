@@ -35,9 +35,7 @@ export default function Index() {
         <Grid size={{ xs: 12, lg: 6 }} spacing={2} container>
           <Typography component="p"></Typography>
           Curious about the popularity of DT and VK's products? Or how that
-          demand has changed over time? That's what's working now. Coming soon
-          is searching/filtering based on features and use cases as-well-as a
-          new list view.
+          demand has changed over time? Coming soon: a new list view.
           <Typography
             sx={{ fontStyle: "italic" }}
             variant="subtitle1"
@@ -46,7 +44,7 @@ export default function Index() {
             mr={5}
             textAlign={"end"}
           >
-            March 1st 2025
+            May 30th 2025
           </Typography>
         </Grid>
       </Grid>
