@@ -1,7 +1,15 @@
 import { FeatureSupportedInterface, FeatureType, ModType } from "~/models/mod";
 
 export type Frequency = "13.56 MHz" | "125 kHz" | "134 kHz";
-export type ChipUID = "4B" | "7B" | "8B" | "26b" | "37b" | "40b" | "64b";
+export type ChipUID =
+  | "4B"
+  | "7B"
+  | "8B"
+  | "10B"
+  | "26b"
+  | "37b"
+  | "40b"
+  | "64b";
 export type ISOStandards =
   | "14443a"
   | "14443b"
@@ -43,10 +51,19 @@ export interface PaymentInterface extends FeatureSupportedInterface {
   enabled?: boolean;
 }
 
+export interface I2CInterface extends FeatureSupportedInterface {
+  devices?: {
+    partNumber: string;
+    manufacturer: string;
+    datasheet: string; // link
+  }[];
+}
+
 export interface ChipFeaturesInterface {
   payment: PaymentInterface;
   ndef: NDEFInterface;
   power_harvesting: FeatureSupportedInterface;
+  i2c: I2CInterface;
   jcop: JCOPInterface;
   temperature: FeatureSupportedInterface;
   spark: FeatureSupportedInterface;
@@ -83,6 +100,7 @@ export class Chip implements ChipInterface {
       payment: { supported: false },
       ndef: { supported: false },
       power_harvesting: { supported: false },
+      i2c: { supported: false },
       jcop: { supported: false },
       temperature: { supported: false },
       spark: { supported: false },
@@ -232,6 +250,18 @@ export class NTAGI2C extends Chip implements ChipInterface {
       ndef: { supported: true, capacity: "1 kB" },
       iso: ["14443a"],
       power_harvesting: { supported: true },
+      i2c: { supported: true },
+    });
+  }
+}
+
+export class NTAG5Boost extends Chip implements ChipInterface {
+  constructor() {
+    super("NTAG5Boost", "10B", "13.56 MHz", {
+      ndef: { supported: true, capacity: "1 kB" },
+      iso: ["15693"],
+      power_harvesting: { supported: true },
+      i2c: { supported: true },
     });
   }
 }
@@ -263,7 +293,6 @@ export class P71 extends Chip implements ChipInterface {
 export class FidesmoP71 extends P71 {
   constructor() {
     super("Fidesmo P71", {
-      spark: { supported: true },
       payment: { supported: true, enabled: false },
     });
   }

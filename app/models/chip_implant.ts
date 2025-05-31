@@ -28,6 +28,7 @@ import {
   JCOPInterface,
   HitagS2048,
   NTAG413DNA,
+  PaymentInterface,
 } from "~/models/chip";
 
 export type ChipImplantType = "Chip" | "xLED";
@@ -46,12 +47,36 @@ export interface BlinkType extends FeatureSupportedInterface {
 
 export type ChipImplantFeaturesType = {
   smartphone: FeatureSupportedInterface;
-  legeacy_access_control: FeatureSupportedInterface;
+  legacy_access_control: FeatureSupportedInterface;
+  digital_security: FeatureSupportedInterface;
   blink: BlinkType;
   cryptography: ChipCryptographicInteface;
   ndef: NDEFInterface;
+  spark: FeatureSupportedInterface;
   jcop: JCOPInterface;
   temperature: FeatureSupportedInterface;
+  pulse_ox: FeatureSupportedInterface;
+  payment: PaymentInterface;
+  magic: MagicInterface;
+};
+
+export type ChipImplantDetailsType = {
+  smartphone: string[]; // 14443a, 14443b, 15693
+  legacy_access_control: {};
+  digital_security: {
+    cryptography: ChipCryptographicInteface;
+    jcop: JCOPInterface;
+  };
+  data_sharing: {
+    spark: boolean;
+    ndef: NDEFInterface;
+  };
+  sensors: {
+    temperature: boolean;
+    pulse_ox: boolean;
+  };
+  magic: MagicInterface;
+  payment: PaymentInterface;
 };
 
 export interface ChipImplantInterface extends ModInterface {
@@ -88,6 +113,7 @@ export class ChipImplant extends Mod implements ChipImplantInterface {
         ndef: { supported: false },
         jcop: { supported: false },
         temperature: { supported: false },
+        pulse_ox: { supported: false },
 
         ...(features ?? {}),
       } as ChipImplantFeaturesType,
@@ -98,7 +124,9 @@ export class ChipImplant extends Mod implements ChipImplantInterface {
 
     this.chip.forEach((c) => {
       Object.keys(c.features).forEach((key) => {
+        // @ts-expect-error
         if (c?.features[key]?.supported) {
+          // @ts-expect-error
           this._features[key] = { ...this._features[key], ...c.features[key] };
         }
       });
@@ -135,18 +163,26 @@ export class ChipImplant extends Mod implements ChipImplantInterface {
       legacy_access_control: {
         supported: legacyAccessControl,
       },
-      digital_security: { ...this._features.jcop } ?? { supported: false },
-      data_sharing: {
-        supported:
-          this._features?.ndef?.supported || this._features?.spark?.supported,
+      digital_security: (this._features.jcop as FeatureSupportedInterface) ?? {
+        supported: false,
       },
-      blink: { ...this._features.blink },
-      cryptography: { ...this._features.cryptography } ?? { supported: false },
-      ndef: { ...this._features.ndef } ?? { supported: false },
-      jcop: { ...this._features.jcop } ?? { supported: false },
-      temperature: { ...this._features.temperature },
-      payment: { ...this._features.payment },
-      magic: { ...this._features.magic },
+      blink: (this._features.blink as FeatureSupportedInterface) ?? {
+        supported: false,
+      },
+      cryptography: (this._features
+        .cryptography as FeatureSupportedInterface) ?? { supported: false },
+      ndef: (this._features.ndef as FeatureSupportedInterface) ?? {
+        supported: false,
+      },
+      jcop: (this._features.jcop as FeatureSupportedInterface) ?? {
+        supported: false,
+      },
+      temperature: (this._features
+        .temperature as FeatureSupportedInterface) ?? { supported: false },
+      payment: (this._features.payment as FeatureSupportedInterface) ?? {
+        supported: false,
+      },
+      magic: (this._features.magic as MagicInterface) ?? { supported: false },
     };
   }
 
@@ -364,6 +400,32 @@ export class ChipImplant extends Mod implements ChipImplantInterface {
     });
 
     return lines;
+  }
+
+  get details(): ChipImplantDetailsType {
+    const isos = [...new Set(this.chip.map((c) => c.features.iso).flat())];
+    const relevantISOs = isos.filter((iso) =>
+      ["iso14443a", "iso14443b", "iso15693"].includes(iso),
+    );
+
+    return {
+      smartphone: relevantISOs,
+      rfid: {},
+      digital_security: {
+        cryptography: {},
+        jcop: {},
+      },
+      data_sharing: {
+        spark: this.features.spark.supported,
+        ndef: this.features.ndef,
+      },
+      magic: this.features.magic,
+      blink: this.features.blink,
+      sensors: {
+        temperature: this.features.temperature ?? false,
+        pulse_ox: this.features.pulse_ox ?? false,
+      },
+    };
   }
 }
 
@@ -595,5 +657,17 @@ export const CHIP_IMPLANT_MAP: Record<string, () => ModInterface> = {
     new ChipImplant({
       name: "VivoKey Spark2",
       chip: [new NTAG413DNA()],
+    }),
+  "DT NExT v2": () =>
+    new ChipImplant({
+      name: "DT NExT v2",
+      chip: [new NTAGI2C(), CHIP_MAP["T5577"]()],
+      features: {
+        blink: {
+          type: "HF",
+          supported: true,
+          available_colors: ["green", "blue", "white"],
+        },
+      },
     }),
 };
