@@ -86,6 +86,8 @@ export default function App() {
       <Layout>
         <Outlet />
       </Layout>
+
+      <Analytics />
     </Document>
   );
 }
@@ -152,7 +154,6 @@ export function ErrorBoundary() {
               <Link to={"/"}>Wanna go home?</Link>
             </div>
           </div>
-          <Analytics />
         </Layout>
       </Document>
     );

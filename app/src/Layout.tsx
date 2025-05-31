@@ -1,6 +1,5 @@
 import * as React from "react";
 import Box from "@mui/material/Box";
-import Copyright from "./Copyright";
 import {
   AppBar,
   Divider,
@@ -20,18 +19,21 @@ import {
   FormControl,
   InputLabel,
   SelectChangeEvent,
+  Snackbar,
+  Alert,
+  IconButton,
 } from "@mui/material";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useLocation, Link, useSearchParams } from "@remix-run/react";
-import { faChevronRight } from "@fortawesome/pro-regular-svg-icons";
-import { faGear } from "@fortawesome/pro-regular-svg-icons/faGear";
+import { faChevronRight, faLink } from "@fortawesome/pro-regular-svg-icons";
 import { faChartSimpleHorizontal } from "@fortawesome/pro-regular-svg-icons/faChartSimpleHorizontal";
 import { faMagnifyingGlass } from "@fortawesome/pro-regular-svg-icons/faMagnifyingGlass";
 import { faMagnet } from "@fortawesome/pro-light-svg-icons/faMagnet";
 import { faMicrochip } from "@fortawesome/pro-light-svg-icons/faMicrochip";
 import { LegendMenu } from "~/src/UseCaseLegend";
+import Footer from "./Footer";
 
 const navItems = [
   // { name: "About", route: "/about" },
@@ -50,9 +52,17 @@ const navItems = [
 export default function Layout({ children }: { children: React.ReactNode }) {
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = React.useState(false);
+  const [snackbarOpen, setSnackbarOpen] = React.useState(false);
+  const [snackBar, setSnackbar] = React.useState({
+    content: "",
+    type: "success",
+  });
+  const [clipboardSuccess, setClipboardSuccess] = React.useState(true);
 
   const path = decodeURIComponent(location.pathname);
   const leading = path.slice(0, 5);
+
+  const handleSnackbarClose = () => setSnackbarOpen(false);
 
   const GenerateBreadcrumbs = () => {
     const text: React.ReactNode[] = [
@@ -255,6 +265,30 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     setMobileOpen((prevState) => !prevState);
   };
 
+  const handleClipboard = async () => {
+    let success = true;
+
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setTimeout(() => {
+        console.error("Unable to set clipboard!");
+      }, 2000); // reset
+    } catch (err) {
+      success = false;
+      console.error("Unable to set clipboard: ensure you are using https", err);
+    } finally {
+      if (success) {
+        setSnackbar({ content: "URL copied to clipboard", type: "success" });
+      } else {
+        setSnackbar({
+          content: "Unable to set clipboard: ensure you are using https",
+          type: "error",
+        });
+      }
+      setSnackbarOpen(true);
+    }
+  };
+
   // TODO: Decide if this is going to be helpful... Maybe show the full filtering config?
   const drawer = (
     <Grid
@@ -324,9 +358,13 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               <FilterComponent />
             )}
           </Box>
-          <Button onClick={handleDrawerToggle} disabled>
-            <FontAwesomeIcon icon={faGear} />
-          </Button>
+          {["chart", "mod"].includes(location.pathname.split("/")[1]) ? (
+            <IconButton onClick={handleClipboard} size={"small"}>
+              <FontAwesomeIcon icon={faLink} color="white" />
+            </IconButton>
+          ) : (
+            ""
+          )}
         </Toolbar>
       </AppBar>
 
@@ -365,8 +403,21 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           minWidth: "100vw",
         }}
       >
-        <Copyright />
+        <Footer />
       </Container>
+      <Snackbar
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        open={snackbarOpen}
+        onClose={handleSnackbarClose}
+        message={snackBar.content}
+        key={"toast"}
+        autoHideDuration={2000}
+      >
+        {/* @ts-expect-error */}
+        <Alert severity={snackBar.type} variant={"filled"}>
+          {snackBar.content}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }
