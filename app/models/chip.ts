@@ -67,7 +67,7 @@ export interface ChipFeaturesInterface {
   jcop: JCOPInterface;
   temperature: FeatureSupportedInterface;
   spark: FeatureSupportedInterface;
-  cryptographic: ChipCryptographicInteface;
+  cryptography: ChipCryptographicInteface;
   iso: ISOStandards[];
   magic: MagicInterface;
 }
@@ -104,7 +104,7 @@ export class Chip implements ChipInterface {
       jcop: { supported: false },
       temperature: { supported: false },
       spark: { supported: false },
-      cryptographic: { supported: false },
+      cryptography: { supported: false },
       magic: { supported: false },
       ...features, // Override defaults with provided values
     };
@@ -175,7 +175,7 @@ export class AWID extends Chip implements ChipInterface {
 export class HitagS2048 extends Chip implements ChipInterface {
   constructor() {
     super("Hitag S 2048", ["64b"], ["125 kHz"], {
-      cryptographic: {
+      cryptography: {
         supported: true,
         auth_methods: ["Proprietary"],
         encryption_algorithms: ["Proprietary"],
@@ -235,7 +235,7 @@ export class NTAG413DNA extends Chip implements ChipInterface {
       ndef: { supported: !spark },
       spark: { supported: spark },
       iso: ["14443a"],
-      cryptographic: {
+      cryptography: {
         supported: true,
       },
     });
@@ -276,7 +276,7 @@ export class P71 extends Chip implements ChipInterface {
       ndef: { supported: true, capacity: "32 kB" },
       jcop: { supported: true, version: "3.0.5" },
       iso: ["14443a"],
-      cryptographic: {
+      cryptography: {
         supported: true,
         auth_methods: [
           "Proprietary",
@@ -323,7 +323,7 @@ export class DESFireEV1 extends Chip implements ChipInterface {
     super(`MIFARE DESFire EV${ev}`, "7B", "13.56 MHz", {
       iso: ["14443a", "7816"],
       ndef: { supported: true, capacity: "8 kB" },
-      cryptographic: {
+      cryptography: {
         supported: true,
         auth_methods: ["DES", "2K3DES", "3K3DES", "AES"],
         encryption_algorithms: ["DES", "3DES", "AES"],
@@ -364,7 +364,7 @@ export class ICODEDNA extends Chip {
   constructor(spark: boolean = true) {
     super("ICODE DNA", "8B", "13.56 MHz", {
       ndef: { supported: !spark },
-      cryptographic: {
+      cryptography: {
         supported: true,
         auth_methods: ["AES mutual authentication"],
         encryption_algorithms: ["AES-128"],

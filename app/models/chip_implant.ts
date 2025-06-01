@@ -53,6 +53,7 @@ export type ChipImplantFeaturesType = {
   blink: BlinkType;
   cryptography: ChipCryptographicInteface;
   ndef: NDEFInterface;
+  data_sharing: FeatureSupportedInterface;
   spark: FeatureSupportedInterface;
   jcop: JCOPInterface;
   temperature: FeatureSupportedInterface;
@@ -112,6 +113,7 @@ export class ChipImplant extends Mod implements ChipImplantInterface {
         blink: { supported: false },
         cryptography: { supported: false },
         ndef: { supported: false },
+        spark: { supported: false },
         jcop: { supported: false },
         temperature: { supported: false },
         pulse_ox: { supported: false },
@@ -132,6 +134,9 @@ export class ChipImplant extends Mod implements ChipImplantInterface {
         }
       });
     });
+    if (this._features.ndef.supported || this._features.spark.supported) {
+      this._features.data_sharing = { supported: true };
+    }
   }
 
   get uid_length(): string[] {
@@ -167,6 +172,8 @@ export class ChipImplant extends Mod implements ChipImplantInterface {
       digital_security: (this._features.jcop as FeatureSupportedInterface) ?? {
         supported: false,
       },
+      data_sharing: (this._features
+        .data_sharing as FeatureSupportedInterface) ?? { supported: false },
       blink: (this._features.blink as FeatureSupportedInterface) ?? {
         supported: false,
       },
@@ -181,10 +188,13 @@ export class ChipImplant extends Mod implements ChipImplantInterface {
       jcop: (this._features.jcop as FeatureSupportedInterface) ?? {
         supported: false,
       },
-      temperature: (this._features
-        .temperature as FeatureSupportedInterface) ?? { supported: false },
+      temperature: this.temperature as FeatureSupportedInterface,
       pulse_ox: (this._features.pulse_ox as FeatureSupportedInterface) ?? {
         supported: false,
+      },
+      sensors: {
+        supported:
+          this.temperature?.supported || this._features.pulse_ox.supported,
       },
       payment: (this._features.payment as FeatureSupportedInterface) ?? {
         supported: false,
@@ -220,8 +230,8 @@ export class ChipImplant extends Mod implements ChipImplantInterface {
 
   get cryptography(): ChipCryptographicInteface[] {
     return this.chip
-      .filter((c) => c.features.cryptographic.supported)
-      .map((c) => c.features.cryptographic);
+      .filter((c) => c.features.cryptography.supported)
+      .map((c) => c.features.cryptography);
   }
 
   get summary_cryptography(): SummaryLine | null {
@@ -376,24 +386,27 @@ export class ChipImplant extends Mod implements ChipImplantInterface {
     return { feature: "Payment", value: payment.enabled ? "Yes" : "Disabled" };
   }
 
-  get temperature(): FeatureType | null {
-    return (
-      this.chip.find((c) => c.features.temperature.supported)?.features
-        .temperature ?? this.features.temperature
-    );
+  get temperature(): FeatureSupportedInterface | null {
+    const chipFeature = this.chip.find((c) => c.features.temperature.supported)
+      ?.features.temperature;
+    console.log(this.name, chipFeature, this._features.temperature);
+    if (chipFeature === undefined && this._features.temperature.supported) {
+      return this._features.temperature ?? { supported: false };
+    } else if (chipFeature !== undefined) {
+      return chipFeature;
+    }
+
+    return { supported: false };
   }
 
   get summary_sensors(): SummaryLine | null {
-    if (
-      this.features.pulse_ox.supported &&
-      this.features.temperature.supported
-    ) {
+    if (this.features.pulse_ox.supported && this.temperature?.supported) {
       return {
         feature: "Sensors",
         value: "Has pulse ox and temperature sensors",
       };
-    } else if (this.features.temperature) {
-      return { feature: "sensors", value: "Has temperature sensor" };
+    } else if (this.temperature?.supported) {
+      return { feature: "Sensors", value: "Has temperature sensor" };
     } else {
       return null;
     }
@@ -409,10 +422,10 @@ export class ChipImplant extends Mod implements ChipImplantInterface {
       this.summary_data_sharing,
       this.summary_blink,
       this.summary_digital_security,
+      this.summary_cryptography,
       this.summary_magic,
       this.summary_payment,
       this.summary_sensors,
-      this.summary_cryptography,
     ];
 
     features.forEach((feature) => {
@@ -434,10 +447,8 @@ export class ChipImplant extends Mod implements ChipImplantInterface {
     return {
       smartphone: relevantISOs,
       rfid: {},
-      digital_security: {
-        cryptography: {},
-        jcop: {},
-      },
+      digital_security: {},
+      cryptography: {},
       data_sharing: {
         spark: this.features.spark.supported,
         ndef: this.features.ndef,

@@ -220,6 +220,7 @@ const Chart = () => {
         updated = updated.filter((item) =>
           chipFilters.every((f) => {
             const chipImplant: ModInterface = CHIP_IMPLANT_MAP[item.product]();
+            console.log(chipImplant.name, f, chipImplant.features[f]);
 
             return chipImplant.features[f]?.supported;
           }),

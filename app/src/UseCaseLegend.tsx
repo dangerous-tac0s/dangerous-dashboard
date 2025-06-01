@@ -1,4 +1,5 @@
 import {
+  Box,
   ButtonGroup,
   ClickAwayListener,
   Grid,
@@ -26,7 +27,7 @@ import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import theme from "~/src/theme";
 import React, { ReactElement, useEffect } from "react";
-import { faArrowDown } from "@fortawesome/pro-regular-svg-icons";
+import { faArrowDown, faUserShield } from "@fortawesome/pro-regular-svg-icons";
 import { useSearchParams } from "@remix-run/react";
 import { OverridableComponent } from "@mui/types";
 
@@ -55,6 +56,12 @@ const makeLegendElements = (): {
       },
       digital_security: {
         name: "Digital Security",
+        icon: <FontAwesomeIcon size="xl" icon={faUserShield} />,
+        color: null,
+        tooltip: null,
+      },
+      cryptography: {
+        name: "Cryptography",
         icon: <FontAwesomeIcon size="xl" icon={faBinaryLock} />,
         color: null,
         tooltip: null,
@@ -165,12 +172,13 @@ export function SplitButton({
   }, [buttonActive]);
 
   return (
-    <React.Fragment>
+    <Grid>
       <ButtonGroup
         // @ts-expect-error it works : )
         color={theme.palette.primary.dark}
         ref={anchorRef}
         aria-label="Button group with a nested menu"
+        // sx={{ my: ".25rem" }}
       >
         <Button sx={{ border: buttonBorder }} onClick={onClickButton}>
           {icon}
@@ -182,7 +190,9 @@ export function SplitButton({
           aria-haspopup="menu"
           onClick={handleToggle}
           disabled={dropDownDisabled}
+          hidden={dropDownDisabled}
           sx={{
+            display: dropDownDisabled ? "none" : "flex",
             border: buttonBorder,
             "&.Mui-disabled": {
               border: 0, // if you want to override the default opacity
@@ -231,7 +241,7 @@ export function SplitButton({
           </Grow>
         )}
       </Popper>
-    </React.Fragment>
+    </Grid>
   );
 }
 
@@ -271,8 +281,8 @@ export const LegendMenu = () => {
       justifyContent={"space-evenly"}
       container
       display={"flex"}
-      flexGrow={2}
-      alignItems={"center"}
+      // flexGrow={1}
+      // alignItems={"center"}
       // mx={"1rem"}
     >
       {Object.keys(elements).map((key, i) => (
@@ -310,6 +320,8 @@ const LegendPopup = () => {
   featureMap["magic"]["tooltip"] = "Doesn't Support Cloning";
   featureMap["data_sharing"]["tooltip"] = "Can't Share Data";
   featureMap["digital_security"]["tooltip"] = "Doesn't Offer Digital Security";
+  featureMap["cryptography"]["tooltip"] =
+    "Doesn't Support Cryptographic Operations";
   featureMap["payment"]["tooltip"] = "Doesn't Support Payment";
   featureMap["sensors"]["tooltip"] = "No Sensors";
 
@@ -384,6 +396,8 @@ const UseCaseLegend = ({
     featureMap["data_sharing"]["tooltip"] = "Can't Share Data";
     featureMap["digital_security"]["tooltip"] =
       "Doesn't Offer Digital Security";
+    featureMap["cryptography"]["tooltip"] =
+      "Doesn't Support Cryptographic Operations";
     featureMap["payment"]["tooltip"] = "Doesn't Support Payment";
     featureMap["sensors"]["tooltip"] = "No Sensors";
 
@@ -412,6 +426,10 @@ const UseCaseLegend = ({
         featureMap["digital_security"]["color"] = "white";
         featureMap["digital_security"]["tooltip"] =
           "Has Digital Security Features";
+      } else if (feature.feature === "Cryptography") {
+        featureMap["cryptography"]["color"] = "white";
+        featureMap["cryptography"]["tooltip"] =
+          "Supports Cryptographic Operations";
       } else if (feature.feature === "Blink") {
         featureMap["blink"]["color"] = "white";
         featureMap["blink"]["tooltip"] = feature.value;

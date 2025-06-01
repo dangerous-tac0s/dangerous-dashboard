@@ -22,6 +22,7 @@ import {
   Snackbar,
   Alert,
   IconButton,
+  SwipeableDrawer,
 } from "@mui/material";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
@@ -34,6 +35,7 @@ import { faMagnet } from "@fortawesome/pro-light-svg-icons/faMagnet";
 import { faMicrochip } from "@fortawesome/pro-light-svg-icons/faMicrochip";
 import { LegendMenu } from "~/src/UseCaseLegend";
 import Footer from "./Footer";
+import { Fragment } from "react";
 
 const navItems = [
   // { name: "About", route: "/about" },
@@ -67,7 +69,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const GenerateBreadcrumbs = () => {
     const text: React.ReactNode[] = [
       <Link key="/" style={{ textDecoration: "none" }} to={"/"}>
-        <Typography display={{ lg: "block", xs: "none" }}>Home</Typography>
+        <Typography>Home</Typography>
       </Link>,
     ];
 
@@ -108,7 +110,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         maxItems={3}
         separator={<FontAwesomeIcon icon={faChevronRight} />}
         aria-label="breadcrumb"
-        sx={{ marginRight: "1rem" }}
       >
         {text.map((item, i) => (
           <div key={i}>{item}</div>
@@ -175,87 +176,182 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         }
 
         const period = searchParams.get("period") ?? "overall";
-
-        return (
-          <>
+        return [
+          <Grid
+            size={{ xs: 12, md: 8 }}
+            mb={{
+              xs:
+                typeFilters.length === 1 && typeFilters.includes("chips")
+                  ? 2
+                  : 0,
+              md: 0,
+            }}
+            justifyContent={"center"}
+            container
+          >
             {/*  < container sx={{ flexDirection: "row", flex: 2 }} spacing={2}>*/}
             {typeFilters.length === 1 && typeFilters.includes("chips") ? (
               <LegendMenu />
             ) : (
               ""
             )}
-            <Grid
-              container
-              sx={{
-                flexDirection: {
-                  lg: "row",
-                  xs: "column",
-                },
-              }}
-            >
-              <Grid>
-                <FormControl
-                  sx={{
-                    m: 1,
-                    width: 200,
-                  }}
-                  size={"small"}
+          </Grid>,
+          <Grid
+            flex={"row"}
+            size={{ xs: 12, md: 4 }}
+            container={true}
+            spacing={2}
+            alignItems="center"
+          >
+            <Grid size={{ xs: 6 }}>
+              <FormControl fullWidth={true} size={"small"}>
+                <InputLabel id="type-filter-label">Type</InputLabel>
+                <Select
+                  labelId="type-filter-label"
+                  id="type-filter"
+                  multiple
+                  value={typeFilters}
+                  name={"type"}
+                  onChange={toggleTypeFilter}
+                  input={<OutlinedInput label="Type" />}
                 >
-                  <InputLabel id="type-filter-label">Type</InputLabel>
-                  <Select
-                    labelId="type-filter-label"
-                    id="type-filter"
-                    multiple
-                    value={typeFilters}
-                    name={"type"}
-                    onChange={toggleTypeFilter}
-                    input={<OutlinedInput label="Type" />}
-                  >
-                    {types.map((type, i) => {
-                      return (
-                        <MenuItem
-                          key={i}
-                          value={type}
-                          selected={typeFilters.includes(type)}
-                        >
-                          {type[0].toUpperCase() + type.slice(1)}
-                        </MenuItem>
-                      );
-                    })}
-                  </Select>
-                </FormControl>
-              </Grid>
-              <Grid container alignItems={"center"}>
-                <FormControl sx={{ m: 1, width: 200 }} size={"small"}>
-                  <InputLabel id="type-filter-label">Period</InputLabel>
-                  <Select
-                    size={"small"}
-                    name={"period"}
-                    value={period}
-                    defaultValue={"overall"}
-                    onChange={handlePeriodChange}
-                    sx={{
-                      pr: 2,
-                      py: 0,
-                    }}
-                    input={<OutlinedInput label="Type" />}
-                  >
-                    {periods.map((period, i: number) => (
+                  {types.map((type, i) => {
+                    return (
                       <MenuItem
                         key={i}
-                        value={period}
-                        selected={period === period}
+                        value={type}
+                        selected={typeFilters.includes(type)}
                       >
-                        {period[0].toUpperCase() + period.slice(1)}
+                        {type[0].toUpperCase() + type.slice(1)}
                       </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Grid>
+                    );
+                  })}
+                </Select>
+              </FormControl>
             </Grid>
-            {/*</Grid>*/}
-          </>
-        );
+            <Grid size={{ xs: 6 }}>
+              <FormControl
+                fullWidth={true}
+                // sx={{
+                //   m: 1,
+                //   // width: { xs: "100%", md: 200 },
+                // }}
+                size={"small"}
+              >
+                <InputLabel id="type-filter-label">Period</InputLabel>
+                <Select
+                  // size={"small"}
+                  name={"period"}
+                  value={period}
+                  defaultValue={"overall"}
+                  onChange={handlePeriodChange}
+                  sx={{
+                    pr: 2,
+                    py: 0,
+                  }}
+                  input={<OutlinedInput label="Type" />}
+                >
+                  {periods.map((period, i: number) => (
+                    <MenuItem
+                      key={i}
+                      value={period}
+                      selected={period === period}
+                    >
+                      {period[0].toUpperCase() + period.slice(1)}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+          </Grid>,
+        ];
+      // return (
+      //   <Grid
+      //     flexDirection={{ xs: "column-reverse", md: "row" }}
+      //     flex={1}
+      //     container
+      //     my={{ xs: ".5rem", md: 0 }}
+      //     spacing={{ xs: ".5rem", md: 0 }}
+      //   >
+      //     <Grid size={{ xs: 12, md: 8 }}>
+      //       {/*  < container sx={{ flexDirection: "row", flex: 2 }} spacing={2}>*/}
+      //       {typeFilters.length === 1 && typeFilters.includes("chips") ? (
+      //         <LegendMenu />
+      //       ) : (
+      //         ""
+      //       )}
+      //     </Grid>
+      //     <Grid
+      //       flex={"row"}
+      //       size={{ xs: 12, md: 4 }}
+      //       container={true}
+      //       spacing={2}
+      //       alignItems="center"
+      //     >
+      //       <Grid size={{ xs: 6 }}>
+      //         <FormControl fullWidth={true} size={"small"}>
+      //           <InputLabel id="type-filter-label">Type</InputLabel>
+      //           <Select
+      //             labelId="type-filter-label"
+      //             id="type-filter"
+      //             multiple
+      //             value={typeFilters}
+      //             name={"type"}
+      //             onChange={toggleTypeFilter}
+      //             input={<OutlinedInput label="Type" />}
+      //           >
+      //             {types.map((type, i) => {
+      //               return (
+      //                 <MenuItem
+      //                   key={i}
+      //                   value={type}
+      //                   selected={typeFilters.includes(type)}
+      //                 >
+      //                   {type[0].toUpperCase() + type.slice(1)}
+      //                 </MenuItem>
+      //               );
+      //             })}
+      //           </Select>
+      //         </FormControl>
+      //       </Grid>
+      //       <Grid size={{ xs: 6 }}>
+      //         <FormControl
+      //           fullWidth={true}
+      //           // sx={{
+      //           //   m: 1,
+      //           //   // width: { xs: "100%", md: 200 },
+      //           // }}
+      //           size={"small"}
+      //         >
+      //           <InputLabel id="type-filter-label">Period</InputLabel>
+      //           <Select
+      //             // size={"small"}
+      //             name={"period"}
+      //             value={period}
+      //             defaultValue={"overall"}
+      //             onChange={handlePeriodChange}
+      //             sx={{
+      //               pr: 2,
+      //               py: 0,
+      //             }}
+      //             input={<OutlinedInput label="Type" />}
+      //           >
+      //             {periods.map((period, i: number) => (
+      //               <MenuItem
+      //                 key={i}
+      //                 value={period}
+      //                 selected={period === period}
+      //               >
+      //                 {period[0].toUpperCase() + period.slice(1)}
+      //               </MenuItem>
+      //             ))}
+      //           </Select>
+      //         </FormControl>
+      //       </Grid>
+      //     </Grid>
+      //     {/*</Grid>*/}
+      //   </Grid>
+      // );
       default:
         return null;
     }
@@ -299,47 +395,47 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         alignItems: "center",
       }}
     >
+      {/*<List>*/}
+      {/*  {navItems.map((item, i) => (*/}
+      {/*    <ListItem key={i} disablePadding>*/}
+      {/*      <ListItemButton*/}
+      {/*        sx={{ textAlign: "center" }}*/}
+      {/*        role={"button"}*/}
+      {/*        component={Link}*/}
+      {/*        to={item.route}*/}
+      {/*      >*/}
+      {/*        <Button*/}
+      {/*          variant={"outlined"}*/}
+      {/*          fullWidth={true}*/}
+      {/*          disabled={item.route === path}*/}
+      {/*        >*/}
+      {/*          <ListItemText primary={item.name} />*/}
+      {/*        </Button>*/}
+      {/*      </ListItemButton>*/}
+      {/*    </ListItem>*/}
+      {/*  ))}*/}
+      {/*</List>*/}
+
       <Divider />
       <FilterComponent />
-      <List>
-        {navItems.map((item, i) => (
-          <ListItem key={i} disablePadding>
-            <ListItemButton
-              sx={{ textAlign: "center" }}
-              role={"button"}
-              component={Link}
-              to={item.route}
-            >
-              <Button
-                variant={"outlined"}
-                fullWidth={true}
-                disabled={item.route === path}
-              >
-                <ListItemText primary={item.name} />
-              </Button>
-            </ListItemButton>
-          </ListItem>
-        ))}
-      </List>
     </Grid>
   );
 
   return (
     <Box>
       <AppBar component="nav" position="static">
-        <Toolbar component={Paper}>
-          <Box>
+        <Toolbar component={Paper} sx={{ justifyContent: "space-between" }}>
+          <Box minWidth={{ xs: 80, md: "auto" }}>
             <GenerateBreadcrumbs />
           </Box>
           {/* TODO: Switch to hamburger menu on small screens*/}
           <Box
             sx={{
-              display: "flex",
               flexGrow: 1,
               justifyContent: "flex-end",
             }}
           >
-            {!["/chart"].includes(location.pathname) ? (
+            {!["chart"].includes(location.pathname.split("/")[1]) ? (
               navItems.map((item, i) => (
                 <Button
                   component={Link}
@@ -355,30 +451,45 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 </Button>
               ))
             ) : (
-              <FilterComponent />
+              <Grid sx={{ display: { xs: "none", md: "flex" } }} container>
+                <FilterComponent />
+              </Grid>
             )}
           </Box>
-          {["chart", "mod"].includes(location.pathname.split("/")[1]) ? (
-            <IconButton onClick={handleClipboard} size={"small"}>
-              <FontAwesomeIcon icon={faLink} color="white" />
-            </IconButton>
-          ) : (
-            ""
-          )}
+          <Box ml={2}>
+            {["chart", "mod"].includes(location.pathname.split("/")[1]) ? (
+              <IconButton onClick={handleClipboard} size={"small"}>
+                <FontAwesomeIcon icon={faLink} color="white" />
+              </IconButton>
+            ) : (
+              ""
+            )}
+          </Box>
         </Toolbar>
       </AppBar>
 
       <nav>
-        <Drawer
+        <SwipeableDrawer
           variant="temporary"
           open={mobileOpen}
           onClose={handleDrawerToggle}
           onOpen={handleDrawerToggle}
           anchor={"top"}
           ModalProps={{ keepMounted: true }}
+          disableSwipeToOpen={false}
         >
-          {drawer}
-        </Drawer>
+          {/*{drawer}*/}
+          <Grid
+            flex={1}
+            direction="column-reverse"
+            container
+            spacing={2}
+            mt={2}
+            mx={2}
+          >
+            <FilterComponent />
+          </Grid>
+        </SwipeableDrawer>
       </nav>
 
       <Grid
