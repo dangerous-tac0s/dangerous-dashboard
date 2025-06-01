@@ -83,14 +83,14 @@ export function ModDetailRoute() {
       <Grid container mt={"1rem"}>
         {/* Left Column (1/6 width) */}
         <Grid
-          size={{ xl: 3, xs: 12 }}
+          size={{ md: 3, xs: 12 }}
           alignContent={"center"}
           textAlign={{ xs: "center", lg: "end" }}
           justifyContent={{ xs: "center", lg: "end" }}
           sx={{
             mb: { xs: 0, xl: 2 },
             mt: { xs: 4, xl: 0 },
-            mr: { xs: 0, md: 4, xl: 0 },
+            // mr: { xs: 0, md: 4, xl: 0 },
           }}
         >
           {/* Back Button and Page Title */}
@@ -99,14 +99,14 @@ export function ModDetailRoute() {
         </Grid>
 
         {/* Center Column (2/3 width) */}
-        <Grid size={{ xl: 6, xs: 12 }}>
+        <Grid size={{ md: 6, xs: 12 }}>
           {/* Your display content goes here */}
           <ModDetailChart mod={mod as ModInterface} rawData={rawData} />
         </Grid>
 
         {/* Right Column (1/6 width) */}
 
-        <Grid size={{ xl: 3, xs: 12 }}>{/* Empty content on the right */}</Grid>
+        <Grid size={{ md: 3, xs: 12 }}>&nbsp;</Grid>
         {/* Card for sections */}
         <Grid
           flexDirection={"column"}

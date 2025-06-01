@@ -60,7 +60,7 @@ const ModDetailChart = ({
   return (
     <Box sx={{ width: "100%", height: 200, position: "relative" }}>
       <ResponsiveContainer width="100%" height={200}>
-        <AreaChart data={popularity} margin={{ top: 20, bottom: 0, right: 75 }}>
+        <AreaChart data={popularity} margin={{ top: 20, bottom: 0, right: 60 }}>
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="name" />
           <ReferenceLine y={0} stroke="#FFF" />

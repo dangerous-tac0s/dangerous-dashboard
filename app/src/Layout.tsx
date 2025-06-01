@@ -424,19 +424,17 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <Box>
       <AppBar component="nav" position="static">
-        <Toolbar component={Paper} sx={{ justifyContent: "space-between" }}>
+        <Toolbar
+          component={Paper}
+          sx={{ flex: 1, justifyContent: "space-between" }}
+        >
           <Box minWidth={{ xs: 80, md: "auto" }}>
             <GenerateBreadcrumbs />
           </Box>
           {/* TODO: Switch to hamburger menu on small screens*/}
-          <Box
-            sx={{
-              flexGrow: 1,
-              justifyContent: "flex-end",
-            }}
-          >
-            {!["chart"].includes(location.pathname.split("/")[1]) ? (
-              navItems.map((item, i) => (
+          {!["chart"].includes(location.pathname.split("/")[1]) ? (
+            <Grid container sx={{ justifyContent: "flex-end", flex: 1 }}>
+              {navItems.map((item, i) => (
                 <Button
                   component={Link}
                   key={i}
@@ -449,22 +447,35 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                     {item.name}
                   </Typography>
                 </Button>
-              ))
-            ) : (
-              <Grid sx={{ display: { xs: "none", md: "flex" } }} container>
+              ))}
+              {/*<IconButton*/}
+              {/*  onClick={handleClipboard}*/}
+              {/*  size={"small"}*/}
+              {/*  sx={{ display: { xs: "block", md: "none" } }}*/}
+              {/*>*/}
+              {/*  <FontAwesomeIcon icon={faLink} color="white" />*/}
+              {/*</IconButton>*/}
+            </Grid>
+          ) : (
+            <Fragment>
+              <Grid container flex={1} display={{ xs: "none", md: "flex" }}>
                 <FilterComponent />
               </Grid>
-            )}
-          </Box>
-          <Box ml={2}>
-            {["chart", "mod"].includes(location.pathname.split("/")[1]) ? (
-              <IconButton onClick={handleClipboard} size={"small"}>
-                <FontAwesomeIcon icon={faLink} color="white" />
-              </IconButton>
-            ) : (
-              ""
-            )}
-          </Box>
+              <Grid
+                container
+                ml={2}
+                // sx={{ display: { xs: "none", md: "flex" } }}
+              >
+                {["chart", "mod"].includes(location.pathname.split("/")[1]) ? (
+                  <IconButton onClick={handleClipboard} size={"small"}>
+                    <FontAwesomeIcon icon={faLink} color="white" />
+                  </IconButton>
+                ) : (
+                  ""
+                )}
+              </Grid>
+            </Fragment>
+          )}
         </Toolbar>
       </AppBar>
 
@@ -497,6 +508,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         direction="column"
         spacing={2}
         flex={1}
+        mx={"auto"}
         alignItems="center"
         pb={10}
       >
