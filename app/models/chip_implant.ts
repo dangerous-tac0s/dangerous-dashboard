@@ -29,6 +29,7 @@ import {
   HitagS2048,
   NTAG413DNA,
   PaymentInterface,
+  NTAG5Boost,
 } from "~/models/chip";
 
 export type ChipImplantType = "Chip" | "xLED";
@@ -174,11 +175,17 @@ export class ChipImplant extends Mod implements ChipImplantInterface {
       ndef: (this._features.ndef as FeatureSupportedInterface) ?? {
         supported: false,
       },
+      spark: (this._features.spark as FeatureSupportedInterface) ?? {
+        supported: false,
+      },
       jcop: (this._features.jcop as FeatureSupportedInterface) ?? {
         supported: false,
       },
       temperature: (this._features
         .temperature as FeatureSupportedInterface) ?? { supported: false },
+      pulse_ox: (this._features.pulse_ox as FeatureSupportedInterface) ?? {
+        supported: false,
+      },
       payment: (this._features.payment as FeatureSupportedInterface) ?? {
         supported: false,
       },
@@ -372,8 +379,24 @@ export class ChipImplant extends Mod implements ChipImplantInterface {
   get temperature(): FeatureType | null {
     return (
       this.chip.find((c) => c.features.temperature.supported)?.features
-        .temperature ?? null
+        .temperature ?? this.features.temperature
     );
+  }
+
+  get summary_sensors(): SummaryLine | null {
+    if (
+      this.features.pulse_ox.supported &&
+      this.features.temperature.supported
+    ) {
+      return {
+        feature: "Sensors",
+        value: "Has pulse ox and temperature sensors",
+      };
+    } else if (this.features.temperature) {
+      return { feature: "sensors", value: "Has temperature sensor" };
+    } else {
+      return null;
+    }
   }
 
   // TODO: Add other things from the legend... Currently, smartphone/legacy access control is inferred from frequency...
@@ -388,7 +411,7 @@ export class ChipImplant extends Mod implements ChipImplantInterface {
       this.summary_digital_security,
       this.summary_magic,
       this.summary_payment,
-      this.temperature ? { feature: "Temperature", value: "Yes" } : null,
+      this.summary_sensors,
       this.summary_cryptography,
     ];
 
@@ -667,6 +690,29 @@ export const CHIP_IMPLANT_MAP: Record<string, () => ModInterface> = {
           type: "HF",
           supported: true,
           available_colors: ["green", "blue", "white"],
+        },
+      },
+    }),
+  "VivoKey Thermo": () =>
+    new ChipImplant({
+      name: "VivoKey Thermo",
+      chip: [new NTAG5Boost([])],
+      features: {
+        temperature: {
+          supported: true,
+        },
+      },
+    }),
+  "VivoKey Pulse": () =>
+    new ChipImplant({
+      name: "VivoKey Pulse",
+      chip: [new NTAG5Boost([])],
+      features: {
+        temperature: {
+          supported: true,
+        },
+        pulse_ox: {
+          supported: true,
         },
       },
     }),

@@ -83,8 +83,8 @@ const makeLegendElements = (): {
         color: null,
         tooltip: null,
       },
-      temperature: {
-        name: "Temperature",
+      sensors: {
+        name: "Sensors",
         icon: <FontAwesomeIcon size="xl" icon={faThermometer} />,
         color: null,
         tooltip: null,
@@ -311,7 +311,7 @@ const LegendPopup = () => {
   featureMap["data_sharing"]["tooltip"] = "Can't Share Data";
   featureMap["digital_security"]["tooltip"] = "Doesn't Offer Digital Security";
   featureMap["payment"]["tooltip"] = "Doesn't Support Payment";
-  featureMap["temperature"]["tooltip"] = "Can't Take Temperature";
+  featureMap["sensors"]["tooltip"] = "No Sensors";
 
   // mod.summary.forEach((feature) => {
   //   if (feature.feature === "Frequency") {
@@ -385,7 +385,7 @@ const UseCaseLegend = ({
     featureMap["digital_security"]["tooltip"] =
       "Doesn't Offer Digital Security";
     featureMap["payment"]["tooltip"] = "Doesn't Support Payment";
-    featureMap["temperature"]["tooltip"] = "Can't Take Temperature";
+    featureMap["sensors"]["tooltip"] = "No Sensors";
 
     mod.summary.forEach((feature) => {
       if (feature.feature === "Frequency") {
@@ -405,9 +405,9 @@ const UseCaseLegend = ({
       } else if (feature.feature === "Magic") {
         featureMap["magic"]["color"] = "white";
         featureMap["magic"]["tooltip"] = `Magic: ${feature.value}`;
-      } else if (feature.feature === "Temperature") {
-        featureMap["temperature"]["color"] = "white";
-        featureMap["temperature"]["tooltip"] = "Can Take Temperature";
+      } else if (feature.feature === "Sensors") {
+        featureMap["sensors"]["color"] = "white";
+        featureMap["sensors"]["tooltip"] = feature.value;
       } else if (feature.feature === "Digital Security") {
         featureMap["digital_security"]["color"] = "white";
         featureMap["digital_security"]["tooltip"] =

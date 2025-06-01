@@ -75,22 +75,26 @@ export function ModDetailRoute() {
   const [mod] = useState<ModInterface | null>(getMod(modName));
 
   return mod === null ? (
-    ""
+    <Typography variant={"h4"} mt={5}>
+      Implant Not Found
+    </Typography>
   ) : (
     <>
-      <Grid container spacing={2}>
+      <Grid container mt={"1rem"}>
         {/* Left Column (1/6 width) */}
         <Grid
           size={{ xl: 3, xs: 12 }}
           alignContent={"center"}
-          textAlign={{ xs: "center", md: "end" }}
+          textAlign={{ xs: "center", lg: "end" }}
+          justifyContent={{ xs: "center", lg: "end" }}
           sx={{
-            mb: { xs: 0, xl: 4 },
+            mb: { xs: 0, xl: 2 },
             mt: { xs: 4, xl: 0 },
             mr: { xs: 0, md: 4, xl: 0 },
           }}
         >
           {/* Back Button and Page Title */}
+          <Typography variant={"h4"}>{modName.replace("DT ", "")}</Typography>
           Annual Change in Popularity
         </Grid>
 
@@ -118,6 +122,7 @@ export function ModDetailRoute() {
               sx={{
                 p: "1rem",
                 borderRadius: 3,
+                mt: ".5rem",
               }}
             >
               <UseCaseLegend props={{ name: mod.name }} />
@@ -154,8 +159,6 @@ export function ModDetailRoute() {
               </ListItem>
             </List>
           </Box>
-          {/*  </Box>*/}
-          {/*</Box>*/}
         </Grid>
       </Grid>
     </>

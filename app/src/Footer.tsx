@@ -9,7 +9,9 @@ import { faGear } from "@fortawesome/pro-regular-svg-icons/faGear";
 export default function Footer() {
   return (
     <Grid flexDirection={"row"} container>
-      <Grid></Grid>
+      <Grid>
+        <Button hidden />
+      </Grid>
       <Grid flex={1}>
         <Typography
           variant="subtitle2"

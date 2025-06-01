@@ -53,7 +53,7 @@ export interface PaymentInterface extends FeatureSupportedInterface {
 
 export interface I2CInterface extends FeatureSupportedInterface {
   devices?: {
-    partNumber: string;
+    part_number: string;
     manufacturer: string;
     datasheet: string; // link
   }[];
@@ -134,8 +134,6 @@ export class Chip implements ChipInterface {
     return this._features.magic;
   }
 }
-
-// TODO: Refactor these to be less dumb--as I did in chip_implant
 
 /****************************************/
 /* LF Chips                             */
@@ -256,12 +254,18 @@ export class NTAGI2C extends Chip implements ChipInterface {
 }
 
 export class NTAG5Boost extends Chip implements ChipInterface {
-  constructor() {
+  constructor(
+    devices: {
+      part_number: string;
+      manufacturer: string;
+      datasheet: string;
+    }[] = [],
+  ) {
     super("NTAG5Boost", "10B", "13.56 MHz", {
       ndef: { supported: true, capacity: "1 kB" },
       iso: ["15693"],
       power_harvesting: { supported: true },
-      i2c: { supported: true },
+      i2c: { supported: true, devices },
     });
   }
 }
@@ -406,44 +410,36 @@ export class MagicMIFAREg1a extends Chip implements ChipInterface {
   }
 }
 
+export class MagicMIFAREg2 extends Chip implements ChipInterface {
+  constructor() {
+    super("Magic MIFARE Classic gen2", [], [], {
+      magic: {
+        supported: true,
+        invoked_by: ["direct write"],
+        chips: [new MIFAREClassic4B()],
+      },
+    });
+  }
+}
+
 // Generic
 
 export class PaymentChip extends Chip implements ChipInterface {
-  constructor() {
+  constructor(iso: "14443a" | "14443b" = "14443a") {
     super("Payment Chip", [], ["13.56 MHz"], {
       payment: { supported: true, enabled: true },
-      iso: ["14443a"],
+      iso: [iso],
     });
   }
 }
 
 export const CHIP_MAP = {
   // LF Chips
-  T5577: () =>
-    new Chip("T5577", [], [], {
-      magic: {
-        supported: true,
-        invoked_by: ["wake up"],
-        chips: [
-          new EM41xx(),
-          new HIDProx(),
-          new AWID(),
-          new Indala(),
-          new Keri(),
-          new USPetChip(),
-        ],
-      },
-    }),
-
+  T5577: () => new T5577(),
   // HF Chips
-  "Magic MIFARE Classic G2": () =>
-    new Chip("Magic MIFARE Classic G2", [], [], {
-      magic: {
-        supported: true,
-        chips: [new MIFAREClassic4B()],
-        invoked_by: ["wake up"],
-      },
-    }),
+  "Magic MIFARE Classic G1a": () => new MagicMIFAREg1a(),
+  "Magic MIFARE Classic G2": () => new MagicMIFAREg2(),
+  "Payment Chip": () => new PaymentChip(),
 };
 
 export interface ModMetadata {
