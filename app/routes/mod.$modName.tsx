@@ -1,4 +1,4 @@
-import { useLoaderData, useNavigate } from "@remix-run/react";
+import { useLoaderData, useNavigate, useSearchParams } from "@remix-run/react";
 import { useState } from "react";
 import { CHIP_IMPLANT_MAP } from "~/models/chip_implant";
 import { ModInterface } from "~/models/mod";
@@ -12,6 +12,7 @@ import {
   ListItem,
   ListItemIcon,
   ListItemText,
+  ListSubheader,
   Paper,
 } from "@mui/material";
 import Box from "@mui/material/Box";
@@ -22,6 +23,7 @@ import { faMagnifyingGlass } from "@fortawesome/pro-regular-svg-icons/faMagnifyi
 import { faCamera } from "@fortawesome/pro-regular-svg-icons/faCamera";
 import { faCircleNodes } from "@fortawesome/pro-regular-svg-icons/faCircleNodes";
 import UseCaseLegend from "~/src/UseCaseLegend";
+import { LegendMenu } from "~/src/UseCaseLegend";
 
 const getMod = (name: string) => {
   if (Object.keys(MAGNET_IMPLANT_MAP).includes(name)) {
@@ -73,6 +75,78 @@ export function ModDetailRoute() {
     modType: string;
   }>();
   const [mod] = useState<ModInterface | null>(getMod(modName));
+  const [searchParams, setSearchParams] = useSearchParams();
+  const targetFeature = searchParams.getAll("chip"); // There should only be one
+
+  const Content = () => {
+    let content: any[] = [];
+    console.log(targetFeature);
+    if (targetFeature.length === 0) {
+      content = [
+        <ListItem>
+          <ListItemText
+            primary={"Install Method"}
+            secondary={
+              <span style={{ paddingLeft: "1rem" }}>{mod?.install_method}</span>
+            }
+          />
+        </ListItem>,
+        <ListItem>
+          <ListItemText
+            primary={"Chip(s)"}
+            secondary={
+              <span style={{ paddingLeft: "1rem" }}>
+                {mod?.chip.map((e) => e.name).join(", ")}
+              </span>
+            }
+          />
+        </ListItem>,
+        <ListItem>
+          <ListItemText
+            primary={"Description"}
+            secondary={
+              <span style={{ paddingLeft: "1rem" }}>{mod?.description}</span>
+            }
+          />
+        </ListItem>,
+      ];
+    } else {
+      console.log(targetFeature[0], !mod?.features[targetFeature[0]].supported);
+      if (!mod?.features[targetFeature[0]].supported) {
+        content.push(
+          <ListItem>
+            <ListItemText secondary={"Not supported."} />
+          </ListItem>,
+        );
+      } else {
+        switch (targetFeature[0]) {
+          case "smartphone":
+            content.push(
+              <ListItem>
+                <ListItemText
+                  primary={"Relevant ISO(s)"}
+                  secondary={
+                    <span style={{ paddingLeft: "1rem" }}>
+                      {mod?.details["smartphone"]
+                        .map((iso, i) => iso)
+                        .join(", ")}
+                    </span>
+                  }
+                />
+              </ListItem>,
+            );
+
+            break;
+          case "":
+            break;
+          default:
+            console.log("Not found");
+        }
+      }
+    }
+
+    return <List className={"list-disc pl-10"}>{content}</List>;
+  };
 
   return mod === null ? (
     <Typography variant={"h4"} mt={5}>
@@ -90,7 +164,6 @@ export function ModDetailRoute() {
           sx={{
             mb: { xs: 0, xl: 2 },
             mt: { xs: 4, xl: 0 },
-            // mr: { xs: 0, md: 4, xl: 0 },
           }}
         >
           {/* Back Button and Page Title */}
@@ -125,39 +198,30 @@ export function ModDetailRoute() {
                 mt: ".5rem",
               }}
             >
-              <UseCaseLegend props={{ name: mod.name }} />
+              {/*<UseCaseLegend props={{ name: mod.name }} />*/}
+              <LegendMenu onlyOne={true} mod={mod} />
             </Box>
           ) : (
             ""
           )}
-          <Box component={Paper} sx={{ p: 3, borderRadius: 3 }}>
-            <Typography variant={"h5"}> Coming Soon™</Typography>
-            <List className={"list-disc pl-10"}>
-              <ListItem>
-                <ListItemIcon>
-                  <FontAwesomeIcon icon={faMagnifyingGlass} />
-                </ListItemIcon>
-                <ListItemText primary={"Detailed views of features"} />
-              </ListItem>
-              <ListItem>
-                <ListItemIcon>
-                  <FontAwesomeIcon icon={faList} />
-                </ListItemIcon>
-                <ListItemText primary={"Description of Mod"} />
-              </ListItem>
-              <ListItem>
-                <ListItemIcon>
-                  <FontAwesomeIcon icon={faCamera} />
-                </ListItemIcon>
-                <ListItemText primary={"Photo or maybe render"} />
-              </ListItem>
-              <ListItem>
-                <ListItemIcon>
-                  <FontAwesomeIcon icon={faCircleNodes} />
-                </ListItemIcon>
-                <ListItemText primary={"List possible similar alternatives"} />
-              </ListItem>
-            </List>
+          <Box
+            component={Paper}
+            sx={{
+              p: 3,
+              borderRadius: 3,
+              width: { xs: "100%", md: "auto" },
+              minWidth: "360px",
+            }}
+          >
+            <Typography variant={"h5"}>
+              {targetFeature.length > 0
+                ? targetFeature[0]
+                    .split("_")
+                    .map((e) => e[0].toUpperCase() + e.slice(1))
+                    .join(" ")
+                : "Overview"}
+            </Typography>
+            <Content />
           </Box>
         </Grid>
       </Grid>

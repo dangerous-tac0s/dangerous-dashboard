@@ -23,11 +23,13 @@ import { faMobileSignal } from "@fortawesome/pro-light-svg-icons/faMobileSignal"
 import { CHIP_IMPLANT_MAP } from "~/models/chip_implant";
 import { faThermometer } from "@fortawesome/pro-light-svg-icons/faThermometer";
 import { faShareFromSquare } from "@fortawesome/pro-light-svg-icons/faShareFromSquare";
+import { faUserShield } from "@fortawesome/pro-light-svg-icons/faUserShield";
+import { faCircle } from "@fortawesome/pro-thin-svg-icons/faCircle";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import theme from "~/src/theme";
 import React, { ReactElement, useEffect } from "react";
-import { faArrowDown, faUserShield } from "@fortawesome/pro-regular-svg-icons";
+import { faArrowDown } from "@fortawesome/pro-regular-svg-icons";
 import { useSearchParams } from "@remix-run/react";
 import { OverridableComponent } from "@mui/types";
 
@@ -245,62 +247,91 @@ export function SplitButton({
   );
 }
 
-export const LegendMenu = () => {
+export const LegendMenu = (props) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const elements = makeLegendElements();
   const chipFilters = searchParams.getAll("chip");
+  const { onlyOne, mod } = props;
+  console.log(mod.features["smartphone"].supported);
 
-  // let mod = null;
-  // if (name && Object.keys(CHIP_IMPLANT_MAP).includes(name)) {
-  //   mod = CHIP_IMPLANT_MAP[name]();
-  // }
-
-  const toggleChipFilter = (chipName: string) => {
-    console.log(chipFilters);
-    if (chipFilters.includes(chipName)) {
+  const toggleChipFilter = (chipName: string, onlyOne: boolean) => {
+    if (onlyOne) {
       setSearchParams(
         (prev) => {
-          prev.delete("chip", chipName);
+          if (prev.getAll("chip").includes(chipName)) {
+            prev.delete("chip");
+
+            return prev;
+          } else {
+            prev.set("chip", chipName);
+          }
+
           return prev;
         },
-        { replace: true },
+        { preventScrollReset: true },
       );
     } else {
-      setSearchParams(
-        (prev) => {
-          prev.append("chip", chipName);
-          return prev;
-        },
-        { replace: true },
-      );
+      if (chipFilters.includes(chipName)) {
+        setSearchParams(
+          (prev) => {
+            prev.delete("chip", chipName);
+            return prev;
+          },
+          { replace: true, preventScrollReset: true },
+        );
+      } else {
+        setSearchParams(
+          (prev) => {
+            prev.append("chip", chipName);
+            return prev;
+          },
+          { replace: true },
+        );
+      }
     }
   };
-
   return (
-    <Grid
-      justifyContent={"space-evenly"}
-      container
-      display={"flex"}
-      // flexGrow={1}
-      // alignItems={"center"}
-      // mx={"1rem"}
-    >
+    <Grid justifyContent={"space-evenly"} container display={"flex"}>
       {Object.keys(elements).map((key, i) => (
         <SplitButton
-          key={i}
+          key={`btn-${key}-${i}`}
           icon={
-            <Typography
-              color={
-                chipFilters.includes(key)
-                  ? theme.palette.action.active
-                  : theme.palette.action.disabled
-              }
-            >
-              {elements[key].icon}
+            <Typography>
+              {mod ? (
+                <span
+                  style={{
+                    position: "relative",
+                    display: "inline-block",
+                    height: "3em",
+                    alignContent: "center",
+                    color: !mod.features[key].supported ? "red" : "white",
+                  }}
+                >
+                  {chipFilters &&
+                  chipFilters.length !== 0 &&
+                  chipFilters[0].toLowerCase() === key.toLowerCase() ? (
+                    <FontAwesomeIcon
+                      style={{
+                        position: "absolute",
+                        top: "50%",
+                        left: "50%",
+                        transform: "translate(-50%, -50%)",
+                      }}
+                      icon={faCircle}
+                      size={"3x"}
+                    />
+                  ) : (
+                    ""
+                  )}
+                  {elements[key].icon}
+                </span>
+              ) : (
+                ""
+              )}
             </Typography>
           }
           buttonActive={(() => chipFilters.includes(key)) as unknown as boolean}
-          onClickButton={() => toggleChipFilter(key)}
+          onClickButton={() => toggleChipFilter(key, onlyOne)}
           options={[]}
         />
       ))}

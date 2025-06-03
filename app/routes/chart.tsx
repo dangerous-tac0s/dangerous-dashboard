@@ -1,5 +1,10 @@
-import { useLoaderData, useNavigate, useSearchParams } from "@remix-run/react";
-import { useEffect, useState } from "react";
+import {
+  Link,
+  useLoaderData,
+  useNavigate,
+  useSearchParams,
+} from "@remix-run/react";
+import { useEffect, useRef, useState } from "react";
 import { CHIP_IMPLANT_MAP } from "~/models/chip_implant";
 import { MAGNET_IMPLANT_MAP } from "~/models/magnet_implant";
 import { ModInterface } from "~/models/mod";
@@ -156,6 +161,7 @@ const Chart = () => {
     string,
     () => ModInterface
   > | null>(null);
+  const tooltipRef = useRef(null);
   const [tooltipVisible, setTooltipVisible] = useState(false);
   const [previousClick, setPreviousClick] = useState<string | null>(null);
 
@@ -167,19 +173,29 @@ const Chart = () => {
 
   const mode = searchParams.get("period") ?? "overall";
 
+  const clickInTooltip = (tooltip, clickEvent): boolean => {
+    console.log("click");
+    console.log(tooltip);
+    const x1 = tooltip.x;
+    const x2 = tooltip.x + tooltip.offsetWidth;
+    const y1 = tooltip.y;
+    const y2 = tooltip.y + tooltip.offsetHeight;
+
+    return x1 < clickEvent.clientX < x2 && y1 < clickEvent.clientY < y2;
+  };
+
   // A single handler for all bars
-  const handleBarClick = (dataItem: ChartDataItem) => {
-    if (
-      tooltipVisible &&
-      (previousClick === dataItem.product || previousClick === null)
-    ) {
-      // Navigate to /mod/<productName>
-      setPreviousClick(null);
-      navigate(`/mod/${encodeURIComponent(dataItem.product)}`);
-    } else {
-      setPreviousClick(dataItem.product);
-      setTooltipVisible(true);
-    }
+  const handleBarClick = (dataItem: ChartDataItem, id, e) => {
+    // if (
+    //   tooltipVisible &&
+    //   (previousClick === dataItem.product || previousClick === null)
+    // ) {
+    //   setPreviousClick(null);
+    // } else {
+    //   setPreviousClick(dataItem.product);
+    //   setTooltipVisible(true);
+    // }
+    navigate(`/mod/${encodeURIComponent(dataItem.product)}`);
   };
 
   const applyFilters = (
@@ -220,7 +236,6 @@ const Chart = () => {
         updated = updated.filter((item) =>
           chipFilters.every((f) => {
             const chipImplant: ModInterface = CHIP_IMPLANT_MAP[item.product]();
-            console.log(chipImplant.name, f, chipImplant.features[f]);
 
             return chipImplant.features[f]?.supported;
           }),
@@ -261,6 +276,7 @@ const Chart = () => {
 
     return mod ? (
       <Grid
+        ref={tooltipRef}
         size={{ xs: 12, lg: 6, xl: 4 }}
         sx={{
           position: "fixed",
@@ -269,9 +285,14 @@ const Chart = () => {
           transform: "translate(-50%, -50%)",
           flex: 1,
           justifyContent: "flex-start",
+          cursor: "pointer", // optional, for UX
         }}
         component={Paper}
         border={`solid thin ${theme.palette.mode === "dark" ? "black" : "gray"}`}
+        onClick={() => {
+          console.log(`/mod/${encodeURIComponent(label)}`);
+          // navigate(`/mod/${encodeURIComponent(label)}`);
+        }}
       >
         {["chip", "xled"].includes(mod.mod_type.toLowerCase()) ? (
           <Grid
@@ -300,7 +321,9 @@ const Chart = () => {
             }}
             container
           >
-            <Typography color={"white"}>{label}</Typography>
+            <Typography color={"white"}>
+              <Link to={`/mod/${label}`}>{label}</Link>
+            </Typography>
           </Grid>
           <Grid
             sx={{
@@ -458,6 +481,7 @@ const Chart = () => {
                 textAnchor="end"
                 fill="#666"
                 style={{ whiteSpace: "pre-line" }}
+                onClick={() => navigate(`/mod/${payload.value}`)}
               >
                 {/* Trim the labels to reduce the width... Slightly. */}
                 {payload.value
@@ -468,26 +492,19 @@ const Chart = () => {
             width={200}
             interval={0}
           />
-          {/* @ts-expect-error BarChat is passing params to the tooltip*/}
-          <Tooltip content={<CustomTooltip />} />
-          <Bar
-            dataKey="direct"
-            onClick={handleBarClick}
-            onMouseEnter={() => {
-              setTooltipVisible(true);
-            }}
-            onMouseLeave={() => {
-              setPreviousClick(null);
-              setTooltipVisible(false);
-            }}
-            barSize={38}
-          >
+          <Bar dataKey="direct" onClick={handleBarClick} barSize={38}>
             {data.map((entry, index) => (
               <Cell key={index} fill={colorMap[entry.product]} />
             ))}
             {/* @ts-expect-error */}
             <LabelList dataKey="percentage" content={renderCustomLabel} />
           </Bar>
+          <Tooltip
+            content={(e) => {
+              console.log(e);
+              return null;
+            }}
+          />
         </BarChart>
       ) : (
         <Box

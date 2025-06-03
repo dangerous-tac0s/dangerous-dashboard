@@ -30,11 +30,12 @@ import {
   NTAG413DNA,
   PaymentInterface,
   NTAG5Boost,
+  T5577,
 } from "~/models/chip";
 
 export type ChipImplantType = "Chip" | "xLED";
 export type ChipImplantInstallationMethodType =
-  | "Injectable"
+  | "Injection"
   | "4g Needle"
   | "Scalpel";
 export type FormFactorType = "x-Series" | "flex";
@@ -66,9 +67,9 @@ export type ChipImplantDetailsType = {
   smartphone: string[]; // 14443a, 14443b, 15693
   legacy_access_control: {};
   digital_security: {
-    cryptography: ChipCryptographicInteface;
     jcop: JCOPInterface;
   };
+  cryptography: ChipCryptographicInteface;
   data_sharing: {
     spark: boolean;
     ndef: NDEFInterface;
@@ -96,8 +97,15 @@ export class ChipImplant extends Mod implements ChipImplantInterface {
   readonly form_factor: FormFactorType;
 
   constructor(meta: Partial<ChipImplantInterface>) {
-    const { name, mod_type, chip, install_method, form_factor, features } =
-      meta;
+    const {
+      name,
+      mod_type,
+      chip,
+      install_method,
+      form_factor,
+      features,
+      description,
+    } = meta;
 
     if (!name) {
       throw new Error("Chip Implant name required");
@@ -107,7 +115,8 @@ export class ChipImplant extends Mod implements ChipImplantInterface {
       {
         name,
         mod_type: mod_type ?? "Chip",
-        install_method: (install_method ?? "Injectable") as string,
+        install_method: (install_method ?? "Injection") as string,
+        description: description,
       },
       {
         blink: { supported: false },
@@ -389,7 +398,7 @@ export class ChipImplant extends Mod implements ChipImplantInterface {
   get temperature(): FeatureSupportedInterface | null {
     const chipFeature = this.chip.find((c) => c.features.temperature.supported)
       ?.features.temperature;
-    console.log(this.name, chipFeature, this._features.temperature);
+
     if (chipFeature === undefined && this._features.temperature.supported) {
       return this._features.temperature ?? { supported: false };
     } else if (chipFeature !== undefined) {
@@ -441,14 +450,14 @@ export class ChipImplant extends Mod implements ChipImplantInterface {
   get details(): ChipImplantDetailsType {
     const isos = [...new Set(this.chip.map((c) => c.features.iso).flat())];
     const relevantISOs = isos.filter((iso) =>
-      ["iso14443a", "iso14443b", "iso15693"].includes(iso),
+      ["14443a", "14443b", "15693"].includes(iso.toLowerCase()),
     );
 
     return {
       smartphone: relevantISOs,
       rfid: {},
-      digital_security: {},
-      cryptography: {},
+      digital_security: this.features.jcop,
+      cryptography: this.features.cryptography,
       data_sharing: {
         spark: this.features.spark.supported,
         ndef: this.features.ndef,
@@ -456,8 +465,8 @@ export class ChipImplant extends Mod implements ChipImplantInterface {
       magic: this.features.magic,
       blink: this.features.blink,
       sensors: {
-        temperature: this.features.temperature ?? false,
-        pulse_ox: this.features.pulse_ox ?? false,
+        temperature: this.features.temperature.supported ?? false,
+        pulse_ox: this.features.pulse_ox.supported ?? false,
       },
     };
   }
@@ -536,16 +545,18 @@ export const CHIP_IMPLANT_MAP: Record<string, () => ModInterface> = {
   "DT NExT": () =>
     new ChipImplant({
       name: "DT NExT",
-      chip: [new NTAG216(), CHIP_MAP["T5577"]()],
-      install_method: "Injectable",
+      chip: [new NTAG216(), new T5577()],
+      install_method: "Injection",
       form_factor: "x-Series",
       mod_type: "Chip",
+      description:
+        "DT's first dual-frequency implant! This offers all features of the NTAG216 (data sharing, limited access control compatibility) with a T5577 to allow low frequency transponder emulation!",
     }),
   "DT xBT": () =>
     new ChipImplant({
       name: "DT xBT",
       chip: [new DestronFearing()],
-      install_method: "Injectable",
+      install_method: "Injection",
       form_factor: "x-Series",
       mod_type: "Chip",
     }),
@@ -553,14 +564,14 @@ export const CHIP_IMPLANT_MAP: Record<string, () => ModInterface> = {
     new ChipImplant({
       name: "DT xEM",
       chip: [CHIP_MAP["T5577"]()],
-      install_method: "Injectable",
+      install_method: "Injection",
       form_factor: "x-Series",
       mod_type: "Chip",
     }),
   "DT xLED HF": () =>
     new ChipImplant({
       name: "DT xLED HF",
-      install_method: "Injectable",
+      install_method: "Injection",
       form_factor: "x-Series",
       mod_type: "xLED",
       features: {
@@ -581,14 +592,14 @@ export const CHIP_IMPLANT_MAP: Record<string, () => ModInterface> = {
           available_colors: ["red", "green", "blue", "white"],
         },
       },
-      install_method: "Injectable",
+      install_method: "Injection",
       form_factor: "x-Series",
       mod_type: "xLED",
     }),
   "DT xHT": () =>
     new ChipImplant({
       name: "DT xHT",
-      install_method: "Injectable",
+      install_method: "Injection",
       form_factor: "x-Series",
       mod_type: "Chip",
       chip: [new HitagS2048()],
@@ -597,7 +608,7 @@ export const CHIP_IMPLANT_MAP: Record<string, () => ModInterface> = {
     new ChipImplant({
       name: "DT xM1+",
       chip: [new MagicMIFAREg1a()],
-      install_method: "Injectable",
+      install_method: "Injection",
       form_factor: "x-Series",
       mod_type: "Chip",
     }),
@@ -610,7 +621,7 @@ export const CHIP_IMPLANT_MAP: Record<string, () => ModInterface> = {
     new ChipImplant({
       name: "DT xMagic G1a",
       chip: [new MagicMIFAREg1a(), CHIP_MAP["T5577"]()],
-      install_method: "Injectable",
+      install_method: "Injection",
       form_factor: "x-Series",
       mod_type: "Chip",
     }),
@@ -618,7 +629,7 @@ export const CHIP_IMPLANT_MAP: Record<string, () => ModInterface> = {
     new ChipImplant({
       name: "DT xMagic G2",
       chip: [CHIP_MAP["Magic MIFARE Classic G2"](), CHIP_MAP["T5577"]()],
-      install_method: "Injectable",
+      install_method: "Injection",
       form_factor: "x-Series",
       mod_type: "Chip",
     }),
@@ -626,7 +637,7 @@ export const CHIP_IMPLANT_MAP: Record<string, () => ModInterface> = {
     new ChipImplant({
       name: "DT xNT",
       chip: [new NTAG216()],
-      install_method: "Injectable",
+      install_method: "Injection",
       form_factor: "x-Series",
       mod_type: "Chip",
     }),
@@ -635,7 +646,7 @@ export const CHIP_IMPLANT_MAP: Record<string, () => ModInterface> = {
       name: "DT xSIID",
       chip: [new NTAGI2C()],
       mod_type: "Chip",
-      install_method: "Injectable",
+      install_method: "Injection",
       form_factor: "x-Series",
       features: {
         blink: {

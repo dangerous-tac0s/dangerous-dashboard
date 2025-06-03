@@ -224,7 +224,8 @@ export class T5577 extends Chip implements ChipInterface {
 export class NTAG216 extends Chip implements ChipInterface {
   constructor() {
     super("NTAG216", "7B", "13.56 MHz", {
-      ndef: { supported: true, capacity: "880 B" },
+      ndef: { supported: true, capacity: "888 B" },
+      iso: ["14443a"],
     });
   }
 }

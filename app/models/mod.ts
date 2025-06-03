@@ -1,3 +1,5 @@
+import { ChipImplantDetailsType } from "~/models/chip_implant";
+
 export type ModType = "Magnet" | "Chip" | "Other Mod" | "xLED";
 
 /**
@@ -20,8 +22,10 @@ export interface ModInterface {
   mod_type: string;
   type: string;
   summary: SummaryLine[];
+  details: ChipImplantDetailsType;
   features: { [key: string]: FeatureType };
   install_method: string;
+  description: string | null | undefined;
 }
 
 export abstract class Mod implements ModInterface {
@@ -29,16 +33,18 @@ export abstract class Mod implements ModInterface {
   readonly mod_type: string;
   protected _features: { [key: string]: FeatureType };
   readonly install_method: string = "Unknown";
+  readonly description: string | null | undefined;
 
   constructor(
     meta: ModMetadata,
     features: Partial<Record<string, FeatureType>> = {},
   ) {
-    const { name, mod_type, install_method } = meta;
+    const { name, mod_type, install_method, description } = meta;
     this.name = name;
     this.mod_type = mod_type;
     this.install_method = install_method ?? "Unknown";
     this._features = features as Record<string, FeatureType>;
+    this.description = description ?? null;
   }
 
   // Exists to be overridden
@@ -48,6 +54,10 @@ export abstract class Mod implements ModInterface {
 
   get features() {
     return this._features;
+  }
+
+  get details(): ChipImplantDetailsType {
+    return {};
   }
 
   // Exists to be overridden
@@ -210,6 +220,7 @@ export interface ModMetadata {
   /** "Injectable", "Needle", "Scalpel", or "Unknown" */
   install_method?: string;
   /** "flex", "x-series", "other", or "Unknown" */
+  description?: string;
 }
 
 /**

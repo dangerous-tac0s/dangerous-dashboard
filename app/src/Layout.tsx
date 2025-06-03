@@ -112,7 +112,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         aria-label="breadcrumb"
       >
         {text.map((item, i) => (
-          <div key={i}>{item}</div>
+          <Box key={`breadcrumb-${item}-${i}`}>{item}</Box>
         ))}
       </Breadcrumbs>
     );
@@ -188,6 +188,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             }}
             justifyContent={"center"}
             container
+            key={"legend-menu"}
           >
             {/*  < container sx={{ flexDirection: "row", flex: 2 }} spacing={2}>*/}
             {typeFilters.length === 1 && typeFilters.includes("chips") ? (
@@ -202,6 +203,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             container={true}
             spacing={2}
             alignItems="center"
+            key={"controls"}
           >
             <Grid size={{ xs: 6 }}>
               <FormControl fullWidth={true} size={"small"}>
@@ -218,7 +220,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                   {types.map((type, i) => {
                     return (
                       <MenuItem
-                        key={i}
+                        key={`type-${i}`}
                         value={type}
                         selected={typeFilters.includes(type)}
                       >
@@ -253,7 +255,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 >
                   {periods.map((period, i: number) => (
                     <MenuItem
-                      key={i}
+                      key={`period-${i}`}
                       value={period}
                       selected={period === period}
                     >
@@ -437,7 +439,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               {navItems.map((item, i) => (
                 <Button
                   component={Link}
-                  key={i}
+                  key={`nav-${item.name}`}
                   sx={{ color: "#fff" }}
                   to={item.route}
                   disabled={item.name.toLowerCase() === "finder"}
@@ -448,13 +450,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                   </Typography>
                 </Button>
               ))}
-              {/*<IconButton*/}
-              {/*  onClick={handleClipboard}*/}
-              {/*  size={"small"}*/}
-              {/*  sx={{ display: { xs: "block", md: "none" } }}*/}
-              {/*>*/}
-              {/*  <FontAwesomeIcon icon={faLink} color="white" />*/}
-              {/*</IconButton>*/}
             </Grid>
           ) : (
             <Fragment>
