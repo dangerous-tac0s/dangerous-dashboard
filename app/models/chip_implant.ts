@@ -94,6 +94,7 @@ export interface ChipImplantInterface extends ModInterface {
   form_factor: FormFactorType;
   install_method: ChipImplantInstallationMethodType;
   features: Partial<ChipImplantFeaturesType>;
+  first_offered: number;
 }
 
 export class ChipImplant extends Mod implements ChipImplantInterface {
@@ -109,6 +110,7 @@ export class ChipImplant extends Mod implements ChipImplantInterface {
       form_factor,
       features,
       description,
+      first_offered,
     } = meta;
 
     if (!name) {
@@ -121,6 +123,7 @@ export class ChipImplant extends Mod implements ChipImplantInterface {
         mod_type: mod_type ?? "Chip",
         install_method: (install_method ?? "Injection") as string,
         description: (description as string | undefined) ?? "",
+        first_offered: first_offered,
       },
       {
         blink: { supported: false },
@@ -716,6 +719,7 @@ export const CHIP_IMPLANT_MAP: Record<string, () => ModInterface> = {
       install_method: "Injection",
       form_factor: "x-Series",
       mod_type: "Chip",
+      first_offered: 2013,
     }),
   "DT xSIID": () =>
     new ChipImplant({
@@ -731,6 +735,7 @@ export const CHIP_IMPLANT_MAP: Record<string, () => ModInterface> = {
           available_colors: ["red", "green", "blue", "white", "amber"],
         },
       },
+      first_offered: 2019,
     }),
   "DT xSLX": () =>
     new ChipImplant({
@@ -761,6 +766,7 @@ export const CHIP_IMPLANT_MAP: Record<string, () => ModInterface> = {
       mod_type: "Chip",
       description:
         "The long awaited Apex is a smartcard that runs JCOP. It can install various JavaCard applets most of which are geared around digital security.",
+      first_offered: 2021,
     }),
   "VivoKey Apex Mega": () =>
     new ChipImplant({
@@ -769,6 +775,7 @@ export const CHIP_IMPLANT_MAP: Record<string, () => ModInterface> = {
       install_method: "Scalpel",
       form_factor: "flex",
       mod_type: "Chip",
+      first_offered: 2021,
     }),
   "VivoKey Spark1": () =>
     new ChipImplant({
@@ -794,6 +801,7 @@ export const CHIP_IMPLANT_MAP: Record<string, () => ModInterface> = {
       },
       description:
         "The successor to DT's first dual-frequency implant has all the same features of the NExT with the addition of an LED.",
+      first_offered: 2025,
     }),
   "VivoKey Thermo": () =>
     new ChipImplant({

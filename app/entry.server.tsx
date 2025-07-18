@@ -1,13 +1,13 @@
-import * as React from 'react';
-import * as ReactDOMServer from 'react-dom/server';
-import { RemixServer } from '@remix-run/react';
-import type { EntryContext } from '@remix-run/node';
-import createEmotionCache from './src/createEmotionCache';
-import theme from './src/theme';
-import CssBaseline from '@mui/material/CssBaseline';
-import { ThemeProvider } from '@mui/material/styles';
-import { CacheProvider } from '@emotion/react';
-import createEmotionServer from '@emotion/server/create-instance';
+import * as React from "react";
+import * as ReactDOMServer from "react-dom/server";
+import { RemixServer } from "@remix-run/react";
+import type { EntryContext } from "@remix-run/node";
+import createEmotionCache from "./src/createEmotionCache";
+import theme from "./src/theme";
+import CssBaseline from "@mui/material/CssBaseline";
+import { ThemeProvider } from "@mui/material/styles";
+import { CacheProvider } from "@emotion/react";
+import createEmotionServer from "@emotion/server/create-instance";
 
 export default function handleRequest(
   request: Request,
@@ -19,15 +19,23 @@ export default function handleRequest(
   const { extractCriticalToChunks } = createEmotionServer(cache);
 
   function MuiRemixServer() {
-    return (
-      <CacheProvider value={cache}>
-        <ThemeProvider theme={theme}>
-          {/* CssBaseline kickstart an elegant, consistent, and simple baseline to build upon. */}
-          <CssBaseline />
+    if (request.url.includes("api")) {
+      return (
+        <CacheProvider value={cache}>
           <RemixServer context={remixContext} url={request.url} />
-        </ThemeProvider>
-      </CacheProvider>
-    );
+        </CacheProvider>
+      );
+    } else {
+      return (
+        <CacheProvider value={cache}>
+          <ThemeProvider theme={theme}>
+            {/* CssBaseline kickstart an elegant, consistent, and simple baseline to build upon. */}
+            <CssBaseline />
+            <RemixServer context={remixContext} url={request.url} />
+          </ThemeProvider>
+        </CacheProvider>
+      );
+    }
   }
 
   // Render the component to a string.
@@ -36,10 +44,10 @@ export default function handleRequest(
   // Grab the CSS from emotion
   const { styles } = extractCriticalToChunks(html);
 
-  let stylesHTML = '';
+  let stylesHTML = "";
 
   styles.forEach(({ key, ids, css }) => {
-    const emotionKey = `${key} ${ids.join(' ')}`;
+    const emotionKey = `${key} ${ids.join(" ")}`;
     const newStyleTag = `<style data-emotion="${emotionKey}">${css}</style>`;
     stylesHTML = `${stylesHTML}${newStyleTag}`;
   });
@@ -50,7 +58,7 @@ export default function handleRequest(
     `<meta name="emotion-insertion-point" content="emotion-insertion-point"/>${stylesHTML}`,
   );
 
-  responseHeaders.set('Content-Type', 'text/html');
+  responseHeaders.set("Content-Type", "text/html");
 
   return new Response(`<!DOCTYPE html>${markup}`, {
     status: responseStatusCode,

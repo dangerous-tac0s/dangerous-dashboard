@@ -76,13 +76,61 @@ export const colorPalette45: string[] = [
   "#8e506b",
 ];
 
-interface DataSubset {
+export interface DataSubset {
   direct: { [key: string]: number };
 }
 
 export interface DataSet {
   [key: string]: DataSubset;
 }
+
+export const applyFilters = (
+  data: { product: string; direct: number }[],
+  active: string[],
+  chipFilters: string[],
+): { product: string; direct: number }[] => {
+  // // Type Filter
+  // const active = searchParams.getAll("type") ?? ["chips", "magnets"];
+
+  let updated = [...data];
+  if (active.length === 0) {
+    return [];
+  }
+  if (active.length < 2) {
+    switch (active[0]) {
+      case "chips":
+        updated = updated.filter((item) =>
+          Object.keys(CHIP_IMPLANT_MAP).includes(item.product),
+        );
+        break;
+      case "magnets":
+        updated = updated.filter((item) =>
+          Object.keys(MAGNET_IMPLANT_MAP).includes(item.product),
+        );
+        break;
+      default:
+        updated = [];
+    }
+  }
+
+  // Chip
+  if (active.length === 1 && active.some((item) => item === "chips")) {
+    // At least one chip filter is in use
+    if (chipFilters.length > 0) {
+      // Get our active chip filters
+
+      updated = updated.filter((item) =>
+        chipFilters.every((f) => {
+          const chipImplant: ModInterface = CHIP_IMPLANT_MAP[item.product]();
+
+          return chipImplant.features[f]?.supported;
+        }),
+      );
+    }
+  }
+
+  return updated;
+};
 
 export function floatToLocalizedPercentage(value: number, decimals = 2) {
   const userLocale =
@@ -122,7 +170,7 @@ function mergeProductCounts(
  *   Summation of all products (across all time) with direct/resellers/partners.
  *   Returns an array: [ { product: "DT NExT", direct: 2818, resellers: 169, partners: 185 }, ...]
  */
-function transformOverallByProduct(overallObj: DataSubset) {
+export function transformOverallByProduct(overallObj: DataSubset) {
   const productMap = {} as {
     [key: string]: { direct: number };
   };
@@ -187,57 +235,13 @@ const Chart = () => {
     navigate(`/mod/${encodeURIComponent(dataItem.product)}`);
   };
 
-  const applyFilters = (
-    data: { product: string; direct: number }[],
-  ): { product: string; direct: number }[] => {
-    // Type Filter
-    const active = searchParams.getAll("type") ?? ["chips", "magnets"];
-
-    let updated = [...data];
-    if (active.length === 0) {
-      return [];
-    }
-    if (active.length < 2) {
-      switch (active[0]) {
-        case "chips":
-          updated = updated.filter((item) =>
-            Object.keys(CHIP_IMPLANT_MAP).includes(item.product),
-          );
-          break;
-        case "magnets":
-          updated = updated.filter((item) =>
-            Object.keys(MAGNET_IMPLANT_MAP).includes(item.product),
-          );
-          break;
-        default:
-          updated = [];
-      }
-    }
-
-    // Chip
-    if (active.length === 1 && active.some((item) => item === "chips")) {
-      const chipFilters = searchParams.getAll("chip") ?? [];
-
-      // At least one chip filter is in use
-      if (chipFilters.length > 0) {
-        // Get our active chip filters
-
-        updated = updated.filter((item) =>
-          chipFilters.every((f) => {
-            const chipImplant: ModInterface = CHIP_IMPLANT_MAP[item.product]();
-
-            return chipImplant.features[f]?.supported;
-          }),
-        );
-      }
-    }
-
-    return updated;
-  };
-
-  const data = applyFilters(transformOverallByProduct(dataObj[mode])).sort(
-    (a, b) => a.product.localeCompare(b.product),
-  );
+  const active = searchParams.getAll("type") ?? ["chips", "magnets"];
+  const chipFilters = searchParams.getAll("chip") ?? [];
+  const data = applyFilters(
+    transformOverallByProduct(dataObj[mode]),
+    active,
+    chipFilters,
+  ).sort((a, b) => a.product.localeCompare(b.product));
 
   // Simple custom tooltip: shows label + each dataKey’s name + value
   function CustomTooltip({

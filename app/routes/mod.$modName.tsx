@@ -72,7 +72,6 @@ function flattenNestedObject(obj: Nested, depth = 0, prefix = ""): FlatItem[] {
   const result: FlatItem[] = [];
 
   for (const key in obj) {
-    console.log(key, obj[key]);
     const fullKey = prefix && prefix !== "data" ? `${prefix}.${key}` : key;
     const value = obj[key];
 
