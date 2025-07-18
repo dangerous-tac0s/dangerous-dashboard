@@ -255,7 +255,7 @@ export class ChipImplant extends Mod implements ChipImplantInterface {
   }
 
   get frequency() {
-    return this.chip.map((c) => c.frequency).flat();
+    return [...new Set(this.chip.map((c) => c.frequency).flat())];
   }
 
   get summary_frequency(): SummaryLine | null {

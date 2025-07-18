@@ -24,7 +24,19 @@ export const loader = ({ request }) => {
     .sort((a, b) => a.product.localeCompare(b.product))
     .map((item) => IMPLANT_MAP[item.product]());
 
-  return json(data, {
+  const formatted = data.map((item) => ({
+    name: item.name,
+    uid_length: item._uid_length,
+    frequency: item.frequency,
+    type: item.type,
+    form_factor: item.form_factor,
+    description: item.description,
+    first_offered: item.first_offered,
+    features: item.features,
+    details: item.details,
+  }));
+
+  return json(formatted, {
     status: 200,
     headers: { "Content-Type": "application/json" },
   });
