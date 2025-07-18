@@ -1,7 +1,17 @@
 import * as React from "react";
 import type { MetaFunction } from "@remix-run/node";
 import Typography from "@mui/material/Typography";
-import { Grid } from "@mui/material";
+import {
+  Grid,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  ListSubheader,
+} from "@mui/material";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCheckSquare, faSquare } from "@fortawesome/pro-regular-svg-icons";
+import Box from "@mui/material/Box";
 
 // https://remix.run/docs/en/main/route/meta
 export const meta: MetaFunction = () => [
@@ -23,6 +33,7 @@ export default function Index() {
         alignItems="center"
         justifyContent="center"
         spacing={5}
+        flexDirection={"column"}
       >
         <Grid size={12} textAlign="center">
           <Typography variant="h2" component={"h5"}>

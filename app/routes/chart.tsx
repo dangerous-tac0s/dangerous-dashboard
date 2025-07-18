@@ -501,7 +501,7 @@ const Chart = () => {
           </Bar>
           <Tooltip
             content={(e) => {
-              console.log(e);
+              // console.log(e);
               return null;
             }}
           />

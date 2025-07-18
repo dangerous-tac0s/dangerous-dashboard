@@ -8,22 +8,30 @@ Browse popularity of DT products over time and view the details of each.
 
 Rebooted to trade Tailwind for MUI.
 
-Upcoming:
-- A proper set of themes. I use dark mode. Light mode needs love.
-- Mods (WIP)
-  - Views: charts, list
-  - Filters: Period, Features, Use Cases
-- Implant/Mod Detail View (WIP)
-  - ~~Should show yearly popularity of target Mod~~
-  - Install method
-  - Chip(s) details
-- ~~Implant Summary On Hover~~
-- Implement all chips and mods
-- A proper landing page
-- Features
-  - How common is each
-  - How popular are they
-  - wtf is it?
+- Themes:
+  - [x] Dark
+  - [ ] Light
+- Filters:
+  - [x] Implant/Mod Type
+  - [x] Chip Use Case
+  - [x] Chip Feature
+  - [ ] Installation Type
+  - [ ] Form Factor
+- Views:
+  - [ ] Charts:
+    - [x] Implant Popularity
+    - [ ] Implant Type Comparison
+    - [ ] Blink Breakdown
+    - [ ] Installation Types Comparison
+  - [ ] List
+  - [ ] Mod:
+    - [x] Popularity over time
+    - [x] Use Case Legend
+    - [ ] Description
+    - [ ] Details
+    - [ ] Similar offerings
+    - [ ] Product Page Link
+    - [ ] Image
 
 ## Getting Started
 - Install Node 20

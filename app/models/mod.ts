@@ -33,7 +33,7 @@ export abstract class Mod implements ModInterface {
   readonly mod_type: string;
   protected _features: { [key: string]: FeatureType };
   readonly install_method: string = "Unknown";
-  readonly description: string | null | undefined;
+  readonly description: string | undefined;
 
   constructor(
     meta: ModMetadata,
@@ -44,7 +44,7 @@ export abstract class Mod implements ModInterface {
     this.mod_type = mod_type;
     this.install_method = install_method ?? "Unknown";
     this._features = features as Record<string, FeatureType>;
-    this.description = description ?? null;
+    this.description = description;
   }
 
   // Exists to be overridden

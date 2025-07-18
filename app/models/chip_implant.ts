@@ -47,6 +47,11 @@ export interface BlinkType extends FeatureSupportedInterface {
   color?: BlinkColors;
 }
 
+export interface SensorInterface extends FeatureSupportedInterface {
+  temperature?: boolean;
+  pulse_ox?: boolean;
+}
+
 export type ChipImplantFeaturesType = {
   smartphone: FeatureSupportedInterface;
   legacy_access_control: FeatureSupportedInterface;
@@ -57,8 +62,7 @@ export type ChipImplantFeaturesType = {
   data_sharing: FeatureSupportedInterface;
   spark: FeatureSupportedInterface;
   jcop: JCOPInterface;
-  temperature: FeatureSupportedInterface;
-  pulse_ox: FeatureSupportedInterface;
+  sensors: SensorInterface;
   payment: PaymentInterface;
   magic: MagicInterface;
 };
@@ -75,8 +79,8 @@ export type ChipImplantDetailsType = {
     ndef: NDEFInterface;
   };
   sensors: {
-    temperature: boolean;
-    pulse_ox: boolean;
+    temperature?: boolean;
+    pulse_ox?: boolean;
   };
   magic: MagicInterface;
   payment: PaymentInterface;
@@ -116,7 +120,7 @@ export class ChipImplant extends Mod implements ChipImplantInterface {
         name,
         mod_type: mod_type ?? "Chip",
         install_method: (install_method ?? "Injection") as string,
-        description: description,
+        description: (description as string | undefined) ?? "",
       },
       {
         blink: { supported: false },
@@ -124,8 +128,9 @@ export class ChipImplant extends Mod implements ChipImplantInterface {
         ndef: { supported: false },
         spark: { supported: false },
         jcop: { supported: false },
-        temperature: { supported: false },
-        pulse_ox: { supported: false },
+        // temperature: { supported: false },
+        // pulse_ox: { supported: false },
+        sensors: { supported: false, temperature: false, pulse_ox: false },
 
         ...(features ?? {}),
       } as ChipImplantFeaturesType,
@@ -154,12 +159,14 @@ export class ChipImplant extends Mod implements ChipImplantInterface {
 
   // @ts-expect-error Override is intentional
   get mod_type(): ChipImplantType {
-    return this.mod_type;
+    // @ts-expect-error Override is intentional
+    return "";
   }
 
   // @ts-expect-error Override is intentional
   get install_method(): ChipImplantInstallationMethodType {
-    return this.install_method;
+    // @ts-expect-error Override is intentional
+    return {};
   }
 
   get features(): ChipImplantFeaturesType {
@@ -167,9 +174,7 @@ export class ChipImplant extends Mod implements ChipImplantInterface {
     let legacyAccessControl = false;
     if (this.summary_frequency) {
       smartphone = ["HF", "Dual"].includes(this.summary_frequency["value"]);
-      legacyAccessControl = ["LF", "Dual"].includes(
-        this.summary_frequency["value"],
-      );
+      legacyAccessControl = this.frequency.includes("125 kHz");
     }
     return {
       smartphone: {
@@ -197,14 +202,7 @@ export class ChipImplant extends Mod implements ChipImplantInterface {
       jcop: (this._features.jcop as FeatureSupportedInterface) ?? {
         supported: false,
       },
-      temperature: this.temperature as FeatureSupportedInterface,
-      pulse_ox: (this._features.pulse_ox as FeatureSupportedInterface) ?? {
-        supported: false,
-      },
-      sensors: {
-        supported:
-          this.temperature?.supported || this._features.pulse_ox.supported,
-      },
+      sensors: { ...this._features.sensors },
       payment: (this._features.payment as FeatureSupportedInterface) ?? {
         supported: false,
       },
@@ -396,24 +394,33 @@ export class ChipImplant extends Mod implements ChipImplantInterface {
   }
 
   get temperature(): FeatureSupportedInterface | null {
-    const chipFeature = this.chip.find((c) => c.features.temperature.supported)
-      ?.features.temperature;
+    const chipFeature = {
+      supported: this.features.sensors.temperature ?? false,
+    };
 
-    if (chipFeature === undefined && this._features.temperature.supported) {
-      return this._features.temperature ?? { supported: false };
-    } else if (chipFeature !== undefined) {
-      return chipFeature;
-    }
-
-    return { supported: false };
+    return chipFeature;
   }
 
   get summary_sensors(): SummaryLine | null {
-    if (this.features.pulse_ox.supported && this.temperature?.supported) {
-      return {
-        feature: "Sensors",
-        value: "Has pulse ox and temperature sensors",
-      };
+    if (this.features.sensors.supported) {
+      if (this.features.sensors.temperature && this.features.sensors.pulse_ox) {
+        return {
+          feature: "Sensors",
+          value: "Has pulse ox and temperature sensors",
+        };
+      } else if (this.features.sensors.temperature) {
+        return {
+          feature: "Sensors",
+          value: "Has a temperature sensor",
+        };
+      } else if (this.features.sensors.pulse_ox) {
+        return {
+          feature: "Sensors",
+          value: "Has a pulse oximetry sensor",
+        };
+      } else {
+        return null;
+      }
     } else if (this.temperature?.supported) {
       return { feature: "Sensors", value: "Has temperature sensor" };
     } else {
@@ -448,27 +455,62 @@ export class ChipImplant extends Mod implements ChipImplantInterface {
   }
 
   get details(): ChipImplantDetailsType {
-    const isos = [...new Set(this.chip.map((c) => c.features.iso).flat())];
-    const relevantISOs = isos.filter((iso) =>
-      ["14443a", "14443b", "15693"].includes(iso.toLowerCase()),
-    );
+    // const isos = [...new Set(this.chip.map((c) => c.features.iso).flat())];
+    const smartphoneDetails: any = {
+      chip: this.chip
+        .filter((c) => c.frequency.includes("13.56 MHz"))
+        .map((c) => c.name),
+    };
+    this.chip.forEach((c) => {
+      c.features.iso.forEach((iso) => {
+        smartphoneDetails[iso] = [
+          "14443a-3",
+          "14443a-4",
+          "14443b-3",
+          "15693",
+        ].includes(iso.toLowerCase())
+          ? "Compliant"
+          : false;
+      });
+    });
 
-    return {
-      smartphone: relevantISOs,
-      rfid: {},
-      digital_security: this.features.jcop,
-      cryptography: this.features.cryptography,
+    const serializedDetails = {
+      smartphone: smartphoneDetails.chip
+        ? smartphoneDetails
+        : { supported: false },
+      legacy_access_control: {
+        chip:
+          this.chip.find((chip) => chip.frequency.some((f) => f === "125 kHz"))
+            ?.name ?? null,
+      },
+      digital_security: { jcop: { ...this.features.jcop } },
+      cryptography: { ...this.features.cryptography },
       data_sharing: {
         spark: this.features.spark.supported,
-        ndef: this.features.ndef,
+        ndef: { ...this.features.ndef },
       },
-      magic: this.features.magic,
-      blink: this.features.blink,
-      sensors: {
-        temperature: this.features.temperature.supported ?? false,
-        pulse_ox: this.features.pulse_ox.supported ?? false,
-      },
+      magic: {},
+      blink: { ...this.features.blink },
+      sensors: { ...this.features.sensors },
+      payment: { ...this.features.payment },
     };
+
+    this.chip.forEach((chip) => {
+      if (chip.features.magic.supported) {
+        serializedDetails.magic = {
+          ...serializedDetails.magic,
+          [chip.name]: { ...chip.features.magic },
+        };
+      }
+    });
+
+    // Object.keys(serializedDetails).forEach((key) => {
+    //   if (serializedDetails[key].hasOwnProperty("supported")) {
+    //     delete serializedDetails[key]["supported"];
+    //   }
+    // });
+
+    return serializedDetails;
   }
 }
 
@@ -478,6 +520,8 @@ export const CHIP_IMPLANT_MAP: Record<string, () => ModInterface> = {
     new ChipImplant({
       name: "FlexClass",
       chip: [],
+      description:
+        "The FlexClass is only option for iClass credentials. It relies on the legacy PicoPass chip.",
     }),
   "DT flexEM": () =>
     new ChipImplant({
@@ -485,18 +529,23 @@ export const CHIP_IMPLANT_MAP: Record<string, () => ModInterface> = {
       chip: [CHIP_MAP["T5577"]()],
       install_method: "Scalpel",
       form_factor: "flex",
+      description:
+        "The flexEM is disc of wound enamel wire around a t5577. The undisputed king of LF range in the implant world.",
     }),
   "DT flexDF": () =>
     new ChipImplant({
       name: "DT flexDF",
       chip: [new DESFireEV1()],
       install_method: "4g Needle",
+      description:
+        "The first flex DESFire offering was an EV1 with 8 kB of storage.",
     }),
   "DT flexDF2": () =>
     new ChipImplant({
       name: "DT flexDF2",
       chip: [new DESFireEV2()],
       install_method: "4g Needle",
+      description: "DESFire EV2 in a narrow flex with 8 kB of storage.",
     }),
   "DT flexM1 G1a": () =>
     new ChipImplant({
@@ -504,6 +553,8 @@ export const CHIP_IMPLANT_MAP: Record<string, () => ModInterface> = {
       chip: [new MagicMIFAREg1a()],
       install_method: "4g Needle",
       form_factor: "flex",
+      description:
+        "A flex format magic MIFARE gen1a. It can have 4-byte MIFARE Classic 1k credentials cloned to it using magic backdoor commands.",
     }),
   "DT flexM1 G2": () =>
     new ChipImplant({
@@ -511,6 +562,8 @@ export const CHIP_IMPLANT_MAP: Record<string, () => ModInterface> = {
       chip: [CHIP_MAP["Magic MIFARE Classic G2"]()],
       install_method: "4g Needle",
       form_factor: "flex",
+      description:
+        "A flex format magic MIFARE gen2. It can have 4-byte MIFARE Classic 1k credentials to it using direct write.",
     }),
   "DT flexNT": () =>
     new ChipImplant({
@@ -518,6 +571,7 @@ export const CHIP_IMPLANT_MAP: Record<string, () => ModInterface> = {
       chip: [new NTAG216()],
       install_method: "Scalpel",
       form_factor: "flex",
+      description: "DT's first flex offering: a high performance NTAG216.",
     }),
   "DT flexSecure": () =>
     new ChipImplant({
@@ -526,6 +580,7 @@ export const CHIP_IMPLANT_MAP: Record<string, () => ModInterface> = {
       install_method: "4g Needle",
       form_factor: "flex",
       mod_type: "Chip",
+      description: "A factory open smart card implant that uses NXP's P71.",
     }),
   "DT flexUG4": () =>
     new ChipImplant({
@@ -534,13 +589,18 @@ export const CHIP_IMPLANT_MAP: Record<string, () => ModInterface> = {
       install_method: "4g Needle",
       form_factor: "flex",
       mod_type: "Chip",
+      description:
+        "The Ultimate gen4 in an implant. It's capable of emulating a large number of HF transponders.",
     }),
   "DT Payment Conversion": () =>
     new ChipImplant({
       name: "DT Payment Conversion",
       chip: [new PaymentChip()],
       form_factor: "flex",
+      install_method: "4g Needle",
       mod_type: "Chip",
+      description:
+        "A payment device converted to an implant. These come in a variety of flavors and formats.",
     }),
   "DT NExT": () =>
     new ChipImplant({
@@ -559,6 +619,11 @@ export const CHIP_IMPLANT_MAP: Record<string, () => ModInterface> = {
       install_method: "Injection",
       form_factor: "x-Series",
       mod_type: "Chip",
+      features: {
+        sensors: { supported: true, temperature: true },
+      },
+      description:
+        "This 134 kHz implant features a temperature sensor. It can be read with Halo readers, a Flipper Zero, or a Proxmark.",
     }),
   "DT xEM": () =>
     new ChipImplant({
@@ -567,6 +632,8 @@ export const CHIP_IMPLANT_MAP: Record<string, () => ModInterface> = {
       install_method: "Injection",
       form_factor: "x-Series",
       mod_type: "Chip",
+      description:
+        "DT's first 'magic' offering featuring the versatile t5577, capable of emulating nearly all LF transponders.",
     }),
   "DT xLED HF": () =>
     new ChipImplant({
@@ -581,6 +648,8 @@ export const CHIP_IMPLANT_MAP: Record<string, () => ModInterface> = {
           available_colors: ["red", "green", "blue", "white"],
         },
       },
+      description:
+        "The HF version of the OG blink was brought by the chipless xLED. Originally toted as an in vivo field detector.",
     }),
   "DT xLED LF": () =>
     new ChipImplant({
@@ -595,6 +664,8 @@ export const CHIP_IMPLANT_MAP: Record<string, () => ModInterface> = {
       install_method: "Injection",
       form_factor: "x-Series",
       mod_type: "xLED",
+      description:
+        "The LF version of the OG blink was brought by the chipless xLED. Originally toted as an in vivo field detector.",
     }),
   "DT xHT": () =>
     new ChipImplant({
@@ -603,6 +674,8 @@ export const CHIP_IMPLANT_MAP: Record<string, () => ModInterface> = {
       form_factor: "x-Series",
       mod_type: "Chip",
       chip: [new HitagS2048()],
+      description:
+        "The HITAG2048 is one of the few secure options in the LF world.",
     }),
   "DT xM1+": () =>
     new ChipImplant({
@@ -611,11 +684,14 @@ export const CHIP_IMPLANT_MAP: Record<string, () => ModInterface> = {
       install_method: "Injection",
       form_factor: "x-Series",
       mod_type: "Chip",
+      description:
+        "The first magic HF offering of DT. It uses a gen1 magic MIFARE Classic 1k chip.",
     }),
   "DT xM1 G2": () =>
     new ChipImplant({
       name: "DT xM1 G2",
       chip: [CHIP_MAP["Magic MIFARE Classic G2"]()],
+      description: "",
     }),
   "DT xMagic G1a": () =>
     new ChipImplant({
@@ -683,6 +759,8 @@ export const CHIP_IMPLANT_MAP: Record<string, () => ModInterface> = {
       install_method: "4g Needle",
       form_factor: "flex",
       mod_type: "Chip",
+      description:
+        "The long awaited Apex is a smartcard that runs JCOP. It can install various JavaCard applets most of which are geared around digital security.",
     }),
   "VivoKey Apex Mega": () =>
     new ChipImplant({
@@ -714,28 +792,32 @@ export const CHIP_IMPLANT_MAP: Record<string, () => ModInterface> = {
           available_colors: ["green", "blue", "white"],
         },
       },
+      description:
+        "The successor to DT's first dual-frequency implant has all the same features of the NExT with the addition of an LED.",
     }),
   "VivoKey Thermo": () =>
     new ChipImplant({
       name: "VivoKey Thermo",
       chip: [new NTAG5Boost([])],
       features: {
-        temperature: {
+        sensors: {
           supported: true,
+          temperature: true,
         },
       },
+      description: "Coming Soon™",
     }),
   "VivoKey Pulse": () =>
     new ChipImplant({
       name: "VivoKey Pulse",
       chip: [new NTAG5Boost([])],
       features: {
-        temperature: {
+        sensors: {
           supported: true,
-        },
-        pulse_ox: {
-          supported: true,
+          pulse: true,
+          temperature: true,
         },
       },
+      description: "Coming Soon™",
     }),
 };

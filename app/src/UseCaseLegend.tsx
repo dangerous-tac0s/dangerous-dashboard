@@ -252,7 +252,8 @@ export const LegendMenu = (props) => {
   const elements = makeLegendElements();
   const chipFilters = searchParams.getAll("chip");
   const { onlyOne, mod } = props;
-  console.log(mod.features["smartphone"].supported);
+
+  console.log(props);
 
   const toggleChipFilter = (chipName: string, onlyOne: boolean) => {
     if (onlyOne) {
@@ -292,12 +293,12 @@ export const LegendMenu = (props) => {
   };
   return (
     <Grid justifyContent={"space-evenly"} container display={"flex"}>
-      {Object.keys(elements).map((key, i) => (
-        <SplitButton
-          key={`btn-${key}-${i}`}
-          icon={
-            <Typography>
-              {mod ? (
+      {Object.keys(elements).map((key, i) =>
+        mod ? (
+          <SplitButton
+            key={`btn-${key}-${i}`}
+            icon={
+              <Typography>
                 <span
                   style={{
                     position: "relative",
@@ -325,16 +326,36 @@ export const LegendMenu = (props) => {
                   )}
                   {elements[key].icon}
                 </span>
-              ) : (
-                ""
-              )}
-            </Typography>
-          }
-          buttonActive={(() => chipFilters.includes(key)) as unknown as boolean}
-          onClickButton={() => toggleChipFilter(key, onlyOne)}
-          options={[]}
-        />
-      ))}
+              </Typography>
+            }
+            buttonActive={
+              (() => chipFilters.includes(key)) as unknown as boolean
+            }
+            onClickButton={() => toggleChipFilter(key, onlyOne)}
+            options={[]}
+          />
+        ) : (
+          <SplitButton
+            key={i}
+            icon={
+              <Typography
+                color={
+                  chipFilters.includes(key)
+                    ? theme.palette.action.active
+                    : theme.palette.action.disabled
+                }
+              >
+                {elements[key].icon}
+              </Typography>
+            }
+            buttonActive={
+              (() => chipFilters.includes(key)) as unknown as boolean
+            }
+            onClickButton={() => toggleChipFilter(key)}
+            options={[]}
+          />
+        ),
+      )}
     </Grid>
   );
 };

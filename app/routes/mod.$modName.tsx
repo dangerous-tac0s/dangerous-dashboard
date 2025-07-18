@@ -17,13 +17,8 @@ import {
 } from "@mui/material";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faList } from "@fortawesome/pro-regular-svg-icons/faList";
-import { faMagnifyingGlass } from "@fortawesome/pro-regular-svg-icons/faMagnifyingGlass";
-import { faCamera } from "@fortawesome/pro-regular-svg-icons/faCamera";
-import { faCircleNodes } from "@fortawesome/pro-regular-svg-icons/faCircleNodes";
-import UseCaseLegend from "~/src/UseCaseLegend";
 import { LegendMenu } from "~/src/UseCaseLegend";
+import { Chip } from "~/models/chip";
 
 const getMod = (name: string) => {
   if (Object.keys(MAGNET_IMPLANT_MAP).includes(name)) {
@@ -64,6 +59,134 @@ export async function loader({ params }: { params: { modName: string } }) {
   return json({ modName, rawData });
 }
 
+type Stub = string | boolean | string[];
+// @ts-ignore
+type Nested = Record<string, Stub | Nested>;
+interface FlatItem {
+  key: string;
+  depth: number;
+  value: Stub;
+}
+
+function flattenNestedObject(obj: Nested, depth = 0, prefix = ""): FlatItem[] {
+  const result: FlatItem[] = [];
+
+  for (const key in obj) {
+    console.log(key, obj[key]);
+    const fullKey = prefix && prefix !== "data" ? `${prefix}.${key}` : key;
+    const value = obj[key];
+
+    if (
+      typeof value === "string" ||
+      typeof value === "boolean" ||
+      (Array.isArray(value) && value.every((item) => typeof item === "string"))
+    ) {
+      result.push({
+        key: fullKey,
+        depth,
+        value,
+      });
+    } else if (
+      typeof value === "object" &&
+      value !== null &&
+      !Array.isArray(value)
+    ) {
+      result.push(...flattenNestedObject(value as Nested, depth + 1, fullKey));
+    } else if (
+      Array.isArray(value) &&
+      value.every((item) => item instanceof Chip)
+    ) {
+      result.push({
+        key: fullKey,
+        depth: 1,
+        value: value.map((chip) => chip.name),
+      });
+    } else {
+      throw new Error(`Unsupported value at ${fullKey}`);
+    }
+  }
+
+  return result;
+}
+
+const NestedListItems = (data: Record<string, any>) => {
+  console.log("raw");
+  console.log(data);
+  if (!data) {
+    return null;
+  }
+  const listItems = flattenNestedObject(data);
+  console.log("NestedList");
+  console.log(listItems);
+
+  return (
+    <>
+      {listItems
+        .filter(
+          (item) =>
+            (item.value && !item.key.includes("supported")) ||
+            item.key.toLowerCase() === "enabled",
+        )
+        .map((item, i) =>
+          Array.isArray(item.value) ? (
+            <>
+              <ListItem key={`header-${item.key}-${i}`}>
+                <ListItemText
+                  primary={item.key
+                    .replace(".", "_")
+                    .split("_")
+                    .map((e) => e[0].toUpperCase() + e.slice(1))
+                    .join(" ")}
+                  secondary={
+                    <>
+                      {item.value.map((subItem) => (
+                        <div
+                          key={`${item.key}-${subItem}-item-${i}`}
+                          style={{
+                            paddingLeft: `${item.depth}rem`,
+                          }}
+                        >
+                          {subItem
+                            .split(" ")
+                            .map((e) => e[0].toUpperCase() + e.slice(1))
+                            .join(" ")}
+                        </div>
+                      ))}
+                    </>
+                  }
+                />
+              </ListItem>
+            </>
+          ) : (
+            <ListItem key={`${item.key}-${i}`}>
+              <ListItemText
+                primary={item.key
+                  .replace(".", "_")
+                  .split("_")
+                  .map((e) => e[0].toUpperCase() + e.slice(1))
+                  .join(" ")}
+                secondary={
+                  <span
+                    key={`${item.key}-item-${i}`}
+                    style={{
+                      paddingLeft: `${item.depth}rem`,
+                    }}
+                  >
+                    {typeof item.value === "string" ? item.value : null}
+                    {typeof item.value === "boolean"
+                      ? item.value.toString()[0].toUpperCase() +
+                        item.value.toString().slice(1)
+                      : null}
+                  </span>
+                }
+              />
+            </ListItem>
+          ),
+        )}
+    </>
+  );
+};
+
 /**
  * A simple default export component that shows
  * the mod data, or does something interesting with it.
@@ -79,10 +202,19 @@ export function ModDetailRoute() {
   const targetFeature = searchParams.getAll("chip"); // There should only be one
 
   const Content = () => {
+    // TODO: Make this more modular so it works better with magnets etc
     let content: any[] = [];
     console.log(targetFeature);
     if (targetFeature.length === 0) {
       content = [
+        <ListItem>
+          <ListItemText
+            primary={"Mod Type"}
+            secondary={
+              <span style={{ paddingLeft: "1rem" }}>{mod?.mod_type}</span>
+            }
+          />
+        </ListItem>,
         <ListItem>
           <ListItemText
             primary={"Install Method"}
@@ -91,16 +223,20 @@ export function ModDetailRoute() {
             }
           />
         </ListItem>,
-        <ListItem>
-          <ListItemText
-            primary={"Chip(s)"}
-            secondary={
-              <span style={{ paddingLeft: "1rem" }}>
-                {mod?.chip.map((e) => e.name).join(", ")}
-              </span>
-            }
-          />
-        </ListItem>,
+      ];
+      if (mod?.mod_type === "chip") {
+        content.push(
+          <ListItem>
+            <ListItemText
+              primary={"Description"}
+              secondary={
+                <span style={{ paddingLeft: "1rem" }}>{mod?.description}</span>
+              }
+            />
+          </ListItem>,
+        );
+      }
+      content.push(
         <ListItem>
           <ListItemText
             primary={"Description"}
@@ -109,9 +245,8 @@ export function ModDetailRoute() {
             }
           />
         </ListItem>,
-      ];
+      );
     } else {
-      console.log(targetFeature[0], !mod?.features[targetFeature[0]].supported);
       if (!mod?.features[targetFeature[0]].supported) {
         content.push(
           <ListItem>
@@ -119,27 +254,33 @@ export function ModDetailRoute() {
           </ListItem>,
         );
       } else {
-        switch (targetFeature[0]) {
+        let level = 0;
+        switch (targetFeature[0] ?? null) {
           case "smartphone":
+          case "legacy_access_control":
+          case "digital_security":
+          case "data_sharing":
+          case "cryptography":
+          case "sensors":
+          case "blink":
+          case "payment":
             content.push(
-              <ListItem>
-                <ListItemText
-                  primary={"Relevant ISO(s)"}
-                  secondary={
-                    <span style={{ paddingLeft: "1rem" }}>
-                      {mod?.details["smartphone"]
-                        .map((iso, i) => iso)
-                        .join(", ")}
-                    </span>
-                  }
-                />
-              </ListItem>,
+              // @ts-expect-error
+              <NestedListItems data={mod?.details[targetFeature[0]]} />,
             );
-
             break;
-          case "":
+          case "magic":
+            Object.keys(mod.details.magic).forEach((key) => {
+              content.push(<Typography sx={{ ml: ".5rem" }}>{key}</Typography>);
+              content.push(<NestedListItems data={mod?.details.magic[key]} />);
+            });
             break;
           default:
+            content.push(
+              <ListItem>
+                <ListItemText secondary={"Supported"} />
+              </ListItem>,
+            );
             console.log("Not found");
         }
       }
@@ -188,6 +329,7 @@ export function ModDetailRoute() {
           offset={{ xs: 0, xl: 3 }}
           container
           gap={5}
+          flexGrow={0}
         >
           {mod.mod_type.toLowerCase() === "chip" ? (
             <Box
@@ -202,15 +344,15 @@ export function ModDetailRoute() {
               <LegendMenu onlyOne={true} mod={mod} />
             </Box>
           ) : (
-            ""
+            <Box minWidth={"360px"}>&nbsp;</Box>
           )}
           <Box
             component={Paper}
             sx={{
               p: 3,
               borderRadius: 3,
-              width: { xs: "100%", md: "auto" },
-              minWidth: "360px",
+              width: { xs: "100%", md: "inherit" },
+              // minWidth: "360px",
             }}
           >
             <Typography variant={"h5"}>

@@ -11,7 +11,8 @@ export type ChipUID =
   | "40b"
   | "64b";
 export type ISOStandards =
-  | "14443a"
+  | "14443a-3"
+  | "14443a-4"
   | "14443b"
   | "15693"
   | "11784"
@@ -156,19 +157,19 @@ export class DestronFearing extends Chip implements ChipInterface {
 
 export class EM41xx extends Chip implements ChipInterface {
   constructor() {
-    super("EM41xx", "64b", "134 kHz");
+    super("EM41xx", "64b", "125 kHz");
   }
 }
 
 export class HIDProx extends Chip implements ChipInterface {
   constructor() {
-    super("HIDProx", "64b", "134 kHz");
+    super("HIDProx", "64b", "125 kHz");
   }
 }
 
 export class AWID extends Chip implements ChipInterface {
   constructor() {
-    super("AWID", "64b", "134 kHz");
+    super("AWID", "64b", "125 kHz");
   }
 }
 
@@ -225,7 +226,7 @@ export class NTAG216 extends Chip implements ChipInterface {
   constructor() {
     super("NTAG216", "7B", "13.56 MHz", {
       ndef: { supported: true, capacity: "888 B" },
-      iso: ["14443a"],
+      iso: ["14443a-3"],
     });
   }
 }
@@ -235,7 +236,7 @@ export class NTAG413DNA extends Chip implements ChipInterface {
     super("NTAG413DNA", "7B", "13.56 MHz", {
       ndef: { supported: !spark },
       spark: { supported: spark },
-      iso: ["14443a"],
+      iso: ["14443a-4"],
       cryptography: {
         supported: true,
       },
@@ -247,7 +248,7 @@ export class NTAGI2C extends Chip implements ChipInterface {
   constructor() {
     super("NTAGI2C", "7B", "13.56 MHz", {
       ndef: { supported: true, capacity: "1 kB" },
-      iso: ["14443a"],
+      iso: ["14443a-4"],
       power_harvesting: { supported: true },
       i2c: { supported: true },
     });
@@ -276,7 +277,7 @@ export class P71 extends Chip implements ChipInterface {
     super(name, "7B", "13.56 MHz", {
       ndef: { supported: true, capacity: "32 kB" },
       jcop: { supported: true, version: "3.0.5" },
-      iso: ["14443a"],
+      iso: ["14443a-4"],
       cryptography: {
         supported: true,
         auth_methods: [
@@ -306,7 +307,7 @@ export class FidesmoP71 extends P71 {
 export class MIFAREClassic4B extends Chip implements ChipInterface {
   constructor() {
     super("MIFARE Classic (4-byte NUID)", "4B", "13.56 MHz", {
-      iso: ["14443a"],
+      iso: ["14443a-3"],
     });
   }
 }
@@ -314,7 +315,7 @@ export class MIFAREClassic4B extends Chip implements ChipInterface {
 export class MIFAREClassic7B extends Chip implements ChipInterface {
   constructor() {
     super("MIFARE Classic (7-byte UID)", "7B", "13.56 MHz", {
-      iso: ["14443a"],
+      iso: ["14443a-3"],
     });
   }
 }
@@ -322,7 +323,7 @@ export class MIFAREClassic7B extends Chip implements ChipInterface {
 export class DESFireEV1 extends Chip implements ChipInterface {
   constructor(ev: string = "1", features?: Partial<ChipFeaturesInterface>) {
     super(`MIFARE DESFire EV${ev}`, "7B", "13.56 MHz", {
-      iso: ["14443a", "7816"],
+      iso: ["14443a-3", "14443a-4", "7816"],
       ndef: { supported: true, capacity: "8 kB" },
       cryptography: {
         supported: true,
@@ -426,7 +427,7 @@ export class MagicMIFAREg2 extends Chip implements ChipInterface {
 // Generic
 
 export class PaymentChip extends Chip implements ChipInterface {
-  constructor(iso: "14443a" | "14443b" = "14443a") {
+  constructor(iso: "14443a-4" | "14443b" = "14443a-4") {
     super("Payment Chip", [], ["13.56 MHz"], {
       payment: { supported: true, enabled: true },
       iso: [iso],
