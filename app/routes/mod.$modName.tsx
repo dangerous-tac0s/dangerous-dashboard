@@ -110,14 +110,10 @@ function flattenNestedObject(obj: Nested, depth = 0, prefix = ""): FlatItem[] {
 }
 
 const NestedListItems = (data: Record<string, any>) => {
-  console.log("raw");
-  console.log(data);
   if (!data) {
     return null;
   }
   const listItems = flattenNestedObject(data);
-  console.log("NestedList");
-  console.log(listItems);
 
   return (
     <>
@@ -204,7 +200,7 @@ export function ModDetailRoute() {
   const Content = () => {
     // TODO: Make this more modular so it works better with magnets etc
     let content: any[] = [];
-    console.log(targetFeature);
+
     if (targetFeature.length === 0) {
       content = [
         <ListItem>

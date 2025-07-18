@@ -253,8 +253,6 @@ export const LegendMenu = (props) => {
   const chipFilters = searchParams.getAll("chip");
   const { onlyOne, mod } = props;
 
-  console.log(props);
-
   const toggleChipFilter = (chipName: string, onlyOne: boolean) => {
     if (onlyOne) {
       setSearchParams(

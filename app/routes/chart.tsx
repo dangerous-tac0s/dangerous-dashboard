@@ -173,17 +173,6 @@ const Chart = () => {
 
   const mode = searchParams.get("period") ?? "overall";
 
-  const clickInTooltip = (tooltip, clickEvent): boolean => {
-    console.log("click");
-    console.log(tooltip);
-    const x1 = tooltip.x;
-    const x2 = tooltip.x + tooltip.offsetWidth;
-    const y1 = tooltip.y;
-    const y2 = tooltip.y + tooltip.offsetHeight;
-
-    return x1 < clickEvent.clientX < x2 && y1 < clickEvent.clientY < y2;
-  };
-
   // A single handler for all bars
   const handleBarClick = (dataItem: ChartDataItem, id, e) => {
     // if (
@@ -290,7 +279,7 @@ const Chart = () => {
         component={Paper}
         border={`solid thin ${theme.palette.mode === "dark" ? "black" : "gray"}`}
         onClick={() => {
-          console.log(`/mod/${encodeURIComponent(label)}`);
+          // console.log(`/mod/${encodeURIComponent(label)}`);
           // navigate(`/mod/${encodeURIComponent(label)}`);
         }}
       >
