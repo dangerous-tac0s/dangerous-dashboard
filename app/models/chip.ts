@@ -323,7 +323,7 @@ export class MIFAREClassic7B extends Chip implements ChipInterface {
 export class DESFireEV1 extends Chip implements ChipInterface {
   constructor(ev: string = "1", features?: Partial<ChipFeaturesInterface>) {
     super(`MIFARE DESFire EV${ev}`, "7B", "13.56 MHz", {
-      iso: ["14443a-3", "14443a-4", "7816"],
+      iso: ["14443a-3", "14443a-4" /**"7816"**/],
       ndef: { supported: true, capacity: "8 kB" },
       cryptography: {
         supported: true,

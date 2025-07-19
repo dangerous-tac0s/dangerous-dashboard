@@ -154,8 +154,9 @@ const NestedListItems = (data: Record<string, any>) => {
                   .split("_")
                   .map((e) => e[0].toUpperCase() + e.slice(1))
                   .join(" ")}
+                slotProps={{ secondary: { component: "div" } }}
                 secondary={
-                  <>
+                  <div key={`secondary-${item.key}-${i}`}>
                     {item.value.map((subItem) => (
                       <div
                         key={`${item.key}-${subItem}-item-${i}`}
@@ -171,7 +172,7 @@ const NestedListItems = (data: Record<string, any>) => {
                         </a>
                       </div>
                     ))}
-                  </>
+                  </div>
                 }
               />
             </ListItem>
@@ -229,7 +230,7 @@ export function ModDetailRoute() {
 
     if (targetFeature.length === 0) {
       content = [
-        <ListItem>
+        <ListItem key={"mod_type"}>
           <ListItemText
             primary={"Mod Type"}
             secondary={
@@ -237,7 +238,7 @@ export function ModDetailRoute() {
             }
           />
         </ListItem>,
-        <ListItem>
+        <ListItem key={"install_method"}>
           <ListItemText
             primary={"Install Method"}
             secondary={
@@ -252,9 +253,13 @@ export function ModDetailRoute() {
           />
         </ListItem>,
       ];
-      if (mod?.mod_type === "chip") {
+      if (
+        mod?.description === "" ||
+        mod?.description === null ||
+        mod?.description === undefined
+      ) {
         content.push(
-          <ListItem>
+          <ListItem key={"description"}>
             <ListItemText
               primary={"Description"}
               secondary={
@@ -264,20 +269,21 @@ export function ModDetailRoute() {
           </ListItem>,
         );
       }
+      // content.push(
+      //   <ListItem>
+      //     <ListItemText
+      //       primary={"Description"}
+      //       secondary={
+      //         <span style={{ paddingLeft: "1rem" }}>{mod?.description}</span>
+      //       }
+      //     />
+      //   </ListItem>,
+      // );
       content.push(
-        <ListItem>
-          <ListItemText
-            primary={"Description"}
-            secondary={
-              <span style={{ paddingLeft: "1rem" }}>{mod?.description}</span>
-            }
-          />
-        </ListItem>,
-      );
-      content.push(
-        <ListItem>
+        <ListItem key={"links"}>
           <ListItemText
             primary={"Links"}
+            slotProps={{ secondary: { component: "div" } }}
             secondary={
               <>
                 <div style={{ paddingLeft: "1rem" }}>
@@ -302,7 +308,7 @@ export function ModDetailRoute() {
     } else {
       if (!mod?.features[targetFeature[0]].supported) {
         content.push(
-          <ListItem>
+          <ListItem key={`feature-${targetFeature[0]}`}>
             <ListItemText secondary={"Not supported."} />
           </ListItem>,
         );
@@ -330,7 +336,7 @@ export function ModDetailRoute() {
             break;
           default:
             content.push(
-              <ListItem>
+              <ListItem key={`${targetFeature[0]}-supported`}>
                 <ListItemText secondary={"Supported"} />
               </ListItem>,
             );

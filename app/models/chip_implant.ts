@@ -463,15 +463,14 @@ export class ChipImplant extends Mod implements ChipImplantInterface {
       chip: this.chip
         .filter((c) => c.frequency.includes("13.56 MHz"))
         .map((c) => c.name),
+      iso: [],
     };
+    const hfISOs = ["14443a-3", "14443a-4", "14443b-3", "15693"];
     this.chip.forEach((c) => {
       c.features.iso.forEach((iso) => {
-        smartphoneDetails["iso"] = [
-          "14443a-3",
-          "14443a-4",
-          "14443b-3",
-          "15693",
-        ].filter((i) => i.includes(iso.toLowerCase()));
+        if (hfISOs.includes(iso)) {
+          smartphoneDetails["iso"].push(iso);
+        }
       });
     });
 
