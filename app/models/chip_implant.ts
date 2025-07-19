@@ -466,14 +466,12 @@ export class ChipImplant extends Mod implements ChipImplantInterface {
     };
     this.chip.forEach((c) => {
       c.features.iso.forEach((iso) => {
-        smartphoneDetails[iso] = [
+        smartphoneDetails["iso"] = [
           "14443a-3",
           "14443a-4",
           "14443b-3",
           "15693",
-        ].includes(iso.toLowerCase())
-          ? "Compliant"
-          : false;
+        ].filter((i) => i.includes(iso.toLowerCase()));
       });
     });
 

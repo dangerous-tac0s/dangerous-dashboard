@@ -133,14 +133,14 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       const chipFilters = searchParams
         .getAll(chipName)
         .filter((e) => e.length > 0);
-      if (chipFilters.includes("chip")) {
+      if (chipFilters.includes("feature")) {
         setSearchParams((prev) => {
-          prev.delete("chip", chipName);
+          prev.delete("feature", chipName);
           return prev;
         });
       } else {
         setSearchParams((prev) => {
-          prev.append("chip", chipName);
+          prev.append("feature", chipName);
           return prev;
         });
       }

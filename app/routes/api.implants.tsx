@@ -11,7 +11,7 @@ export const loader = ({ request }) => {
   if (active.length === 0) {
     active = ["chips", "magnets"];
   }
-  let chipFilters = url.searchParams.getAll("chip");
+  let chipFilters = url.searchParams.getAll("feature");
   // const parsed = json.parse(rawData);
   const transformed = transformOverallByProduct(
     rawData["overall"] as unknown as DataSubset,
@@ -22,6 +22,7 @@ export const loader = ({ request }) => {
 
   const data = applyFilters(transformed, active, chipFilters)
     .sort((a, b) => a.product.localeCompare(b.product))
+    //@ts-expect-error
     .map((item) => IMPLANT_MAP[item.product]());
 
   const formatted = data.map((item) => ({

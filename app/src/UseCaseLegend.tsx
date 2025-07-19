@@ -250,19 +250,19 @@ export function SplitButton({
 export const LegendMenu = (props) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const elements = makeLegendElements();
-  const chipFilters = searchParams.getAll("chip");
+  const chipFilters = searchParams.getAll("feature");
   const { onlyOne, mod } = props;
 
   const toggleChipFilter = (chipName: string, onlyOne: boolean) => {
     if (onlyOne) {
       setSearchParams(
         (prev) => {
-          if (prev.getAll("chip").includes(chipName)) {
-            prev.delete("chip");
+          if (prev.getAll("feature").includes(chipName)) {
+            prev.delete("feature");
 
             return prev;
           } else {
-            prev.set("chip", chipName);
+            prev.set("feature", chipName);
           }
 
           return prev;
@@ -273,7 +273,7 @@ export const LegendMenu = (props) => {
       if (chipFilters.includes(chipName)) {
         setSearchParams(
           (prev) => {
-            prev.delete("chip", chipName);
+            prev.delete("feature", chipName);
             return prev;
           },
           { replace: true, preventScrollReset: true },
@@ -281,7 +281,7 @@ export const LegendMenu = (props) => {
       } else {
         setSearchParams(
           (prev) => {
-            prev.append("chip", chipName);
+            prev.append("feature", chipName);
             return prev;
           },
           { replace: true },
@@ -349,7 +349,7 @@ export const LegendMenu = (props) => {
             buttonActive={
               (() => chipFilters.includes(key)) as unknown as boolean
             }
-            onClickButton={() => toggleChipFilter(key)}
+            onClickButton={() => toggleChipFilter(key, false)}
             options={[]}
           />
         ),

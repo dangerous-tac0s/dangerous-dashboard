@@ -108,6 +108,29 @@ function flattenNestedObject(obj: Nested, depth = 0, prefix = ""): FlatItem[] {
   return result;
 }
 
+const formatWikiLink = (key: string, value: string): string => {
+  let link = "https://wiki.dangerousthings.com/";
+  key = key
+    .toLowerCase()
+    .replace("dt ", "")
+    .replace("vivokey ", "")
+    .replaceAll(" ", "_")
+    .replace("chips", "chip");
+  value = value
+    .toLowerCase()
+    .replace("dt ", "")
+    .replace("vivokey ", "")
+    .replaceAll(" ", "-");
+
+  if (key.includes(".")) {
+    link += key.split(".")[0];
+  } else {
+    link += `${key}/${value}`;
+  }
+
+  return link;
+};
+
 const NestedListItems = (data: Record<string, any>) => {
   if (!data) {
     return null;
@@ -115,7 +138,7 @@ const NestedListItems = (data: Record<string, any>) => {
   const listItems = flattenNestedObject(data);
 
   return (
-    <>
+    <div key={`${data.toString()}`}>
       {listItems
         .filter(
           (item) =>
@@ -124,36 +147,36 @@ const NestedListItems = (data: Record<string, any>) => {
         )
         .map((item, i) =>
           Array.isArray(item.value) ? (
-            <>
-              <ListItem key={`header-${item.key}-${i}`}>
-                <ListItemText
-                  primary={item.key
-                    .replace(".", "_")
-                    .split("_")
-                    .map((e) => e[0].toUpperCase() + e.slice(1))
-                    .join(" ")}
-                  secondary={
-                    <>
-                      {item.value.map((subItem) => (
-                        <div
-                          key={`${item.key}-${subItem}-item-${i}`}
-                          style={{
-                            paddingLeft: `${item.depth}rem`,
-                          }}
-                        >
+            <ListItem key={`header-${item.key}-${i}`}>
+              <ListItemText
+                primary={item.key
+                  .replace(".", "_")
+                  .split("_")
+                  .map((e) => e[0].toUpperCase() + e.slice(1))
+                  .join(" ")}
+                secondary={
+                  <>
+                    {item.value.map((subItem) => (
+                      <div
+                        key={`${item.key}-${subItem}-item-${i}`}
+                        style={{
+                          paddingLeft: `${item.depth}rem`,
+                        }}
+                      >
+                        <a href={formatWikiLink(item.key, subItem)}>
                           {subItem
                             .split(" ")
                             .map((e) => e[0].toUpperCase() + e.slice(1))
                             .join(" ")}
-                        </div>
-                      ))}
-                    </>
-                  }
-                />
-              </ListItem>
-            </>
+                        </a>
+                      </div>
+                    ))}
+                  </>
+                }
+              />
+            </ListItem>
           ) : (
-            <ListItem key={`${item.key}-${i}`}>
+            <ListItem key={`${item.key}-header-${i}`}>
               <ListItemText
                 primary={item.key
                   .replace(".", "_")
@@ -167,7 +190,11 @@ const NestedListItems = (data: Record<string, any>) => {
                       paddingLeft: `${item.depth}rem`,
                     }}
                   >
-                    {typeof item.value === "string" ? item.value : null}
+                    {typeof item.value === "string" ? (
+                      <a href={formatWikiLink(item.key, item.value)}>
+                        {item.value}
+                      </a>
+                    ) : null}
                     {typeof item.value === "boolean"
                       ? item.value.toString()[0].toUpperCase() +
                         item.value.toString().slice(1)
@@ -178,7 +205,7 @@ const NestedListItems = (data: Record<string, any>) => {
             </ListItem>
           ),
         )}
-    </>
+    </div>
   );
 };
 
@@ -194,7 +221,7 @@ export function ModDetailRoute() {
   }>();
   const [mod] = useState<ModInterface | null>(getMod(modName));
   const [searchParams, setSearchParams] = useSearchParams();
-  const targetFeature = searchParams.getAll("chip"); // There should only be one
+  const targetFeature = searchParams.getAll("feature"); // There should only be one
 
   const Content = () => {
     // TODO: Make this more modular so it works better with magnets etc
@@ -214,7 +241,13 @@ export function ModDetailRoute() {
           <ListItemText
             primary={"Install Method"}
             secondary={
-              <span style={{ paddingLeft: "1rem" }}>{mod?.install_method}</span>
+              <span style={{ paddingLeft: "1rem" }}>
+                <a
+                  href={`https://wiki.dangerousthings.com/install_method/${mod?.install_method.toLowerCase().replace(" ", "-")}`}
+                >
+                  {mod?.install_method}
+                </a>
+              </span>
             }
           />
         </ListItem>,
@@ -237,6 +270,31 @@ export function ModDetailRoute() {
             primary={"Description"}
             secondary={
               <span style={{ paddingLeft: "1rem" }}>{mod?.description}</span>
+            }
+          />
+        </ListItem>,
+      );
+      content.push(
+        <ListItem>
+          <ListItemText
+            primary={"Links"}
+            secondary={
+              <>
+                <div style={{ paddingLeft: "1rem" }}>
+                  <a
+                    href={`https://dngr.us/${mod?.name.toLowerCase().replace("dt ", "").replace("vivokey ", "").replace(" ", "-")}`}
+                  >
+                    Buy a {mod?.name.replace("DT ", "")}
+                  </a>
+                </div>
+                <div style={{ paddingLeft: "1rem" }}>
+                  <a
+                    href={`https://wiki.dangerousthings.com/implant-o-pedia/${mod?.name.toLowerCase().replace("dt ", "").replace("vivokey ", "").replace(" ", "-")}`}
+                  >
+                    Learn more at the wiki
+                  </a>
+                </div>
+              </>
             }
           />
         </ListItem>,
@@ -335,7 +393,6 @@ export function ModDetailRoute() {
                 mt: ".5rem",
               }}
             >
-              {/*<UseCaseLegend props={{ name: mod.name }} />*/}
               <LegendMenu onlyOne={true} mod={mod} />
             </Box>
           ) : (
@@ -347,7 +404,6 @@ export function ModDetailRoute() {
               p: 3,
               borderRadius: 3,
               width: { xs: "100%", md: "inherit" },
-              // minWidth: "360px",
             }}
           >
             <Typography variant={"h5"}>

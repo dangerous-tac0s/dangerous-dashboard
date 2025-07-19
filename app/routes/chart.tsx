@@ -222,7 +222,7 @@ const Chart = () => {
   const mode = searchParams.get("period") ?? "overall";
 
   // A single handler for all bars
-  const handleBarClick = (dataItem: ChartDataItem, id, e) => {
+  const handleBarClick = (dataItem: ChartDataItem) => {
     // if (
     //   tooltipVisible &&
     //   (previousClick === dataItem.product || previousClick === null)
@@ -236,7 +236,7 @@ const Chart = () => {
   };
 
   const active = searchParams.getAll("type") ?? ["chips", "magnets"];
-  const chipFilters = searchParams.getAll("chip") ?? [];
+  const chipFilters = searchParams.getAll("feature") ?? [];
   const data = applyFilters(
     transformOverallByProduct(dataObj[mode]),
     active,
