@@ -8,6 +8,7 @@ import { json } from "@remix-run/node";
 import ModDetailChart from "../src/ModDetailChart";
 import {
   Grid,
+  ImageListItem,
   List,
   ListItem,
   ListItemIcon,
@@ -19,6 +20,7 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import { LegendMenu } from "~/src/UseCaseLegend";
 import { Chip } from "~/models/chip";
+import { auto } from "@popperjs/core";
 
 const getMod = (name: string) => {
   if (Object.keys(MAGNET_IMPLANT_MAP).includes(name)) {
@@ -238,25 +240,61 @@ export function ModDetailRoute() {
             }
           />
         </ListItem>,
-        <ListItem key={"install_method"}>
-          <ListItemText
-            primary={"Install Method"}
-            secondary={
-              <span style={{ paddingLeft: "1rem" }}>
-                <a
-                  href={`https://wiki.dangerousthings.com/install_method/${mod?.install_method.toLowerCase().replace(" ", "-")}`}
-                >
-                  {mod?.install_method}
-                </a>
-              </span>
-            }
-          />
-        </ListItem>,
       ];
+      if (mod?.install_method) {
+        content.push(
+          <ListItem key={"install_method"}>
+            <ListItemText
+              primary={"Install Method"}
+              secondary={
+                <span style={{ paddingLeft: "1rem" }}>
+                  <a
+                    href={formatWikiLink("install_method", mod.install_method)}
+                  >
+                    {mod?.install_method}
+                  </a>
+                </span>
+              }
+            />
+          </ListItem>,
+        );
+      }
+      if (mod?.first_offered) {
+        content.push(
+          <ListItem key={"first_offered"}>
+            <ListItemText
+              primary={"First Offered"}
+              secondary={
+                <span
+                  style={{
+                    paddingLeft: "1rem",
+                    color: mod?.first_offered > 0 ? "white" : "red",
+                  }}
+                >
+                  {mod?.first_offered > 0 ? mod.first_offered : "Unreleased"}
+                </span>
+              }
+            />
+          </ListItem>,
+        );
+      }
+      if (mod?.discontinued) {
+        content.push(
+          <ListItem key={"discontinued"}>
+            <ListItemText
+              sx={{ color: "red" }}
+              primary={"Discontinued"}
+              secondary={
+                <span style={{ paddingLeft: "1rem" }}>{mod?.discontinued}</span>
+              }
+            />
+          </ListItem>,
+        );
+      }
       if (
-        mod?.description === "" ||
-        mod?.description === null ||
-        mod?.description === undefined
+        mod?.description !== "" &&
+        mod?.description !== null &&
+        mod?.description !== undefined
       ) {
         content.push(
           <ListItem key={"description"}>
@@ -269,16 +307,6 @@ export function ModDetailRoute() {
           </ListItem>,
         );
       }
-      // content.push(
-      //   <ListItem>
-      //     <ListItemText
-      //       primary={"Description"}
-      //       secondary={
-      //         <span style={{ paddingLeft: "1rem" }}>{mod?.description}</span>
-      //       }
-      //     />
-      //   </ListItem>,
-      // );
       content.push(
         <ListItem key={"links"}>
           <ListItemText
@@ -286,25 +314,61 @@ export function ModDetailRoute() {
             slotProps={{ secondary: { component: "div" } }}
             secondary={
               <>
+                {!Number.isInteger(mod?.discontinued) &&
+                mod?.first_offered > 0 ? (
+                  <div style={{ paddingLeft: "1rem" }}>
+                    <a
+                      href={`https://dngr.us/${mod?.product_url ?? mod?.name.toLowerCase().replace("dt ", "").replace("vivokey ", "").replace(" ", "-")}`}
+                    >
+                      Buy
+                    </a>
+                  </div>
+                ) : null}
+
                 <div style={{ paddingLeft: "1rem" }}>
-                  <a
-                    href={`https://dngr.us/${mod?.name.toLowerCase().replace("dt ", "").replace("vivokey ", "").replace(" ", "-")}`}
-                  >
-                    Buy a {mod?.name.replace("DT ", "")}
-                  </a>
-                </div>
-                <div style={{ paddingLeft: "1rem" }}>
-                  <a
-                    href={`https://wiki.dangerousthings.com/implant-o-pedia/${mod?.name.toLowerCase().replace("dt ", "").replace("vivokey ", "").replace(" ", "-")}`}
-                  >
-                    Learn more at the wiki
-                  </a>
+                  {mod?.first_offered > 0 ? (
+                    <a
+                      href={`https://wiki.dangerousthings.com/implant-o-pedia/${mod?.name.toLowerCase().replace("dt ", "").replace("vivokey ", "").replace(" ", "-")}`}
+                    >
+                      Learn more
+                    </a>
+                  ) : null}
+                  {mod?.first_offered < 0 ? (
+                    <a href={`https://forum.dangerousthings.com/c/dt-club`}>
+                      Check the DT Club
+                    </a>
+                  ) : null}
                 </div>
               </>
             }
           />
         </ListItem>,
       );
+      if (mod?.image_uri) {
+        content.unshift(
+          <Box
+            sx={{
+              border: "1px solid",
+              position: "relative",
+              overflow: "hidden",
+            }}
+          >
+            <Box
+              key={`image_uri`}
+              justifyContent={"center"}
+              display={"flex"}
+              sx={{
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+              }}
+              component={"img"}
+              src={mod?.image_uri}
+              alt={modName}
+            ></Box>
+          </Box>,
+        );
+      }
     } else {
       if (!mod?.features[targetFeature[0]].supported) {
         content.push(
@@ -390,7 +454,7 @@ export function ModDetailRoute() {
           gap={5}
           flexGrow={0}
         >
-          {mod.mod_type.toLowerCase() === "chip" ? (
+          {["chip", "xled"].includes(mod.mod_type.toLowerCase()) ? (
             <Box
               component={Paper}
               sx={{
@@ -420,6 +484,7 @@ export function ModDetailRoute() {
                     .join(" ")
                 : "Overview"}
             </Typography>
+
             <Content />
           </Box>
         </Grid>

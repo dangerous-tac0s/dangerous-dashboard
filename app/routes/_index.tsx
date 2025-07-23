@@ -52,7 +52,7 @@ export default function Index() {
             mr={5}
             textAlign={"end"}
           >
-            May 30th 2025
+            July 2025
           </Typography>
         </Grid>
       </Grid>

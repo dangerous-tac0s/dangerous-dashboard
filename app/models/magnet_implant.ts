@@ -29,7 +29,14 @@ export class MagnetImplant extends Mod implements MagnetImplantInterface {
   };
 
   constructor(meta: Partial<MagnetImplantInterface>) {
-    const { name, magnet = [], encapsulation = {}, install_method } = meta;
+    const {
+      name,
+      magnet = [],
+      encapsulation = {},
+      install_method,
+      first_offered,
+      discontinued,
+    } = meta;
     if (!name) {
       throw new Error("Chip Implant name required");
     }
@@ -37,6 +44,8 @@ export class MagnetImplant extends Mod implements MagnetImplantInterface {
       name: name,
       mod_type: "Magnet",
       install_method: install_method ?? "unknown",
+      first_offered,
+      discontinued,
     });
 
     this.encapsulation = {
@@ -117,6 +126,8 @@ export const MAGNET_IMPLANT_MAP: Record<string, () => ModInterface> = {
       magnet: [new Magnet({ orientation: "Axial", type: "Neodymium" })],
       encapsulation: { type: "Casing", material: "Glass" },
       install_method: "injection",
+      first_offered: 2019,
+      discontinued: 2023,
     }),
   "DT xG3 v2": () =>
     new MagnetImplant({
@@ -124,6 +135,7 @@ export const MAGNET_IMPLANT_MAP: Record<string, () => ModInterface> = {
       magnet: [new Magnet({ orientation: "Diametric", type: "Neodymium" })],
       encapsulation: { type: "Casing", material: "Glass" },
       install_method: "injection",
+      first_offered: 2021,
     }),
   "DT TiTAN": () =>
     new MagnetImplant({

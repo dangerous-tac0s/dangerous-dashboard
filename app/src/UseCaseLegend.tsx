@@ -28,7 +28,7 @@ import { faCircle } from "@fortawesome/pro-thin-svg-icons/faCircle";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import theme from "~/src/theme";
-import React, { ReactElement, useEffect } from "react";
+import React, { ReactElement, useEffect, useState } from "react";
 import { faArrowDown } from "@fortawesome/pro-regular-svg-icons";
 import { useSearchParams } from "@remix-run/react";
 import { OverridableComponent } from "@mui/types";
@@ -247,7 +247,7 @@ export function SplitButton({
   );
 }
 
-export const LegendMenu = (props) => {
+export const LegendMenu = (props: any) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const elements = makeLegendElements();
   const chipFilters = searchParams.getAll("feature");
@@ -418,6 +418,7 @@ const UseCaseLegend = ({
     asButtons?: { [key: string]: { onClick: any; color: string } };
   };
 }) => {
+  const [elements, setElements] = useState(makeLegendElements());
   let mod = null;
   if (props && Object.hasOwn(props, "name")) {
     const { name } = props;
@@ -425,70 +426,75 @@ const UseCaseLegend = ({
       mod = CHIP_IMPLANT_MAP[name]();
     }
   }
-  const elements: {
-    [key: string]: {
-      name: string;
-      icon: any;
-      color: null | string;
-      tooltip: null | string;
-      onClick?: (event: React.MouseEvent<HTMLElement>) => void;
-    };
-  } = makeLegendElements();
+  // const elements: {
+  //   [key: string]: {
+  //     name: string;
+  //     icon: any;
+  //     color: null | string;
+  //     tooltip: null | string;
+  //     onClick?: (event: React.MouseEvent<HTMLElement>) => void;
+  //   };
+  // } = makeLegendElements();
 
+  useEffect(() => {
+    if (mod) {
+      const featureMap = { ...elements };
+
+      featureMap["smartphone"]["tooltip"] = "Not Compatible with Smartphones";
+      featureMap["legacy_access_control"]["tooltip"] =
+        "Not Compatible with Legacy Access Control";
+      featureMap["blink"]["tooltip"] = "Doesn't have an LED";
+      featureMap["magic"]["tooltip"] = "Doesn't Support Cloning";
+      featureMap["data_sharing"]["tooltip"] = "Can't Share Data";
+      featureMap["digital_security"]["tooltip"] =
+        "Doesn't Offer Digital Security";
+      featureMap["cryptography"]["tooltip"] =
+        "Doesn't Support Cryptographic Operations";
+      featureMap["payment"]["tooltip"] = "Doesn't Support Payment";
+      featureMap["sensors"]["tooltip"] = "No Sensors";
+
+      mod.summary.forEach((feature) => {
+        if (feature.feature === "Frequency") {
+          if (feature.value === "LF" || feature.value === "Dual") {
+            featureMap["legacy_access_control"]["color"] = "white";
+            featureMap["legacy_access_control"]["tooltip"] =
+              "Compatible with Legacy Access Control Systems";
+          }
+          if (feature.value === "HF" || feature.value === "Dual") {
+            featureMap["smartphone"]["color"] = "white";
+            featureMap["smartphone"]["tooltip"] = "Smartphone Compatible";
+          }
+        } else if (feature.feature === "Data Sharing") {
+          featureMap["data_sharing"]["color"] = "white";
+          featureMap["data_sharing"]["tooltip"] =
+            `Data Sharing: ${feature.value}`;
+        } else if (feature.feature === "Magic") {
+          featureMap["magic"]["color"] = "white";
+          featureMap["magic"]["tooltip"] = `${feature.value}`;
+        } else if (feature.feature === "Sensors") {
+          featureMap["sensors"]["color"] = "white";
+          featureMap["sensors"]["tooltip"] = feature.value;
+        } else if (feature.feature === "Digital Security") {
+          featureMap["digital_security"]["color"] = "white";
+          featureMap["digital_security"]["tooltip"] =
+            "Has Digital Security Features";
+        } else if (feature.feature === "Cryptography") {
+          featureMap["cryptography"]["color"] = "white";
+          featureMap["cryptography"]["tooltip"] =
+            "Supports Cryptographic Operations";
+        } else if (feature.feature === "Blink") {
+          featureMap["blink"]["color"] = "white";
+          featureMap["blink"]["tooltip"] = "Has an LED";
+        } else if (feature.feature === "Payment") {
+          featureMap["payment"]["color"] =
+            feature.value === "Yes" ? "white" : "yellow";
+          featureMap["payment"]["tooltip"] = feature.value;
+        }
+      });
+      setElements(featureMap);
+    }
+  }, []);
   if (mod) {
-    const featureMap = { ...elements };
-
-    featureMap["smartphone"]["tooltip"] = "Not Compatible with Smartphones";
-    featureMap["legacy_access_control"]["tooltip"] =
-      "Not Compatible with Legacy Access Control";
-    featureMap["blink"]["tooltip"] = "Doesn't have an LED";
-    featureMap["magic"]["tooltip"] = "Doesn't Support Cloning";
-    featureMap["data_sharing"]["tooltip"] = "Can't Share Data";
-    featureMap["digital_security"]["tooltip"] =
-      "Doesn't Offer Digital Security";
-    featureMap["cryptography"]["tooltip"] =
-      "Doesn't Support Cryptographic Operations";
-    featureMap["payment"]["tooltip"] = "Doesn't Support Payment";
-    featureMap["sensors"]["tooltip"] = "No Sensors";
-
-    mod.summary.forEach((feature) => {
-      if (feature.feature === "Frequency") {
-        if (feature.value === "LF" || feature.value === "Dual") {
-          featureMap["legacy_access_control"]["color"] = "white";
-          featureMap["legacy_access_control"]["tooltip"] =
-            "Compatible with Legacy Access Control Systems";
-        }
-        if (feature.value === "HF" || feature.value === "Dual") {
-          featureMap["smartphone"]["color"] = "white";
-          featureMap["smartphone"]["tooltip"] = "Smartphone Compatible";
-        }
-      } else if (feature.feature === "Data Sharing") {
-        featureMap["data_sharing"]["color"] = "white";
-        featureMap["data_sharing"]["tooltip"] =
-          `Data Sharing: ${feature.value}`;
-      } else if (feature.feature === "Magic") {
-        featureMap["magic"]["color"] = "white";
-        featureMap["magic"]["tooltip"] = `Magic: ${feature.value}`;
-      } else if (feature.feature === "Sensors") {
-        featureMap["sensors"]["color"] = "white";
-        featureMap["sensors"]["tooltip"] = feature.value;
-      } else if (feature.feature === "Digital Security") {
-        featureMap["digital_security"]["color"] = "white";
-        featureMap["digital_security"]["tooltip"] =
-          "Has Digital Security Features";
-      } else if (feature.feature === "Cryptography") {
-        featureMap["cryptography"]["color"] = "white";
-        featureMap["cryptography"]["tooltip"] =
-          "Supports Cryptographic Operations";
-      } else if (feature.feature === "Blink") {
-        featureMap["blink"]["color"] = "white";
-        featureMap["blink"]["tooltip"] = feature.value;
-      } else if (feature.feature === "Payment") {
-        featureMap["payment"]["color"] =
-          feature.value === "Yes" ? "white" : "yellow";
-        featureMap["payment"]["tooltip"] = feature.value;
-      }
-    });
     return (
       <Grid
         container
@@ -501,10 +507,10 @@ const UseCaseLegend = ({
         gap={{ xs: 3, sm: 0 }}
       >
         {/*<Grid sx={{ xs: 12, md: 6 }} container>*/}
-        {Object.keys(featureMap).map((e, i) => (
-          <Tooltip key={i} title={featureMap[e].tooltip}>
-            <Stack color={featureMap[e].color ?? "red"} mx={1}>
-              {featureMap[e].icon}
+        {Object.keys(elements).map((e, i) => (
+          <Tooltip key={`${mod.name}-${e}-${i}`} title={elements[e].tooltip}>
+            <Stack color={elements[e].color ?? "red"} mx={1}>
+              {elements[e].icon}
             </Stack>
           </Tooltip>
         ))}
@@ -533,6 +539,7 @@ const UseCaseLegend = ({
         | undefined;
     });
   }
+
   return (
     <Grid
       container
@@ -543,7 +550,10 @@ const UseCaseLegend = ({
       spacing={1}
     >
       {Object.keys({ ...elements }).map((e, i) => (
-        <Tooltip key={i} title={elements[e].name}>
+        <Tooltip
+          key={`${mod.name ?? "null"}-${e}-${i}`}
+          title={elements[e].name}
+        >
           {Object.hasOwn(elements["hf"], "onClick") ? (
             <IconButton onClick={elements[e].onClick} size={"small"}>
               <Typography component={"p"} sx={{ color: elements[e].color }}>

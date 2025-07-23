@@ -89,12 +89,15 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       case "/char":
         text.push(<Typography key="chart">Chart</Typography>);
         break;
+      case "/find":
+        text.push(<Typography key="finder">Finder</Typography>);
+        break;
       case "/mod/":
-        text.push(
-          <Link key="mod-link" style={{ textDecoration: "none" }} to={"/chart"}>
-            Chart
-          </Link>,
-        );
+        // text.push(
+        //   <Link key="mod-link" style={{ textDecoration: "none" }} to={"/chart"}>
+        //     Chart
+        //   </Link>,
+        // );
         text.push(
           <Typography key="mod-name">
             {path.slice(5).replace(/^(DT|VK)/, "")}
@@ -434,43 +437,54 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             <GenerateBreadcrumbs />
           </Box>
           {/* TODO: Switch to hamburger menu on small screens*/}
-          {!["chart"].includes(location.pathname.split("/")[1]) ? (
-            <Grid container sx={{ justifyContent: "flex-end", flex: 1 }}>
-              {navItems.map((item, i) => (
-                <Button
-                  component={Link}
-                  key={`nav-${item.name}`}
-                  sx={{ color: "#fff" }}
-                  to={item.route}
-                  disabled={item.name.toLowerCase() === "finder"}
-                >
-                  {item.icon ?? item.name}
-                  <Typography display={{ xs: "none", sm: "block" }} pl={1}>
-                    {item.name}
-                  </Typography>
-                </Button>
-              ))}
-            </Grid>
+          {!["chart", "finder"].includes(path.split("/")[1]) ? (
+            <Fragment>
+              <Grid container sx={{ justifyContent: "flex-end", flex: 1 }}>
+                {navItems.map((item, i) => (
+                  <Button
+                    component={Link}
+                    key={`nav-${item.name}`}
+                    sx={{ color: "#fff" }}
+                    to={item.route}
+                  >
+                    {item.icon ?? item.name}
+                    <Typography display={{ xs: "none", sm: "block" }} pl={1}>
+                      {item.name}
+                    </Typography>
+                  </Button>
+                ))}
+              </Grid>
+              {/*<Grid container ml={2}>*/}
+              {/*  {path.includes("mod") || path.includes("finder") ? (*/}
+              {/*    <IconButton onClick={handleClipboard} size={"small"}>*/}
+              {/*      <FontAwesomeIcon icon={faLink} color="white" />*/}
+              {/*    </IconButton>*/}
+              {/*  ) : (*/}
+              {/*    ""*/}
+              {/*  )}*/}
+              {/*</Grid>*/}
+            </Fragment>
           ) : (
             <Fragment>
               <Grid container flex={1} display={{ xs: "none", md: "flex" }}>
                 <FilterComponent />
               </Grid>
-              <Grid
-                container
-                ml={2}
-                // sx={{ display: { xs: "none", md: "flex" } }}
-              >
-                {["chart", "mod"].includes(location.pathname.split("/")[1]) ? (
-                  <IconButton onClick={handleClipboard} size={"small"}>
-                    <FontAwesomeIcon icon={faLink} color="white" />
-                  </IconButton>
-                ) : (
-                  ""
-                )}
-              </Grid>
+              {/*<Grid container ml={2}>*/}
+              {/*  {location.pathname.includes("chart") ? (*/}
+              {/*    <IconButton onClick={handleClipboard} size={"small"}>*/}
+              {/*      <FontAwesomeIcon icon={faLink} color="white" />*/}
+              {/*    </IconButton>*/}
+              {/*  ) : (*/}
+              {/*    ""*/}
+              {/*  )}*/}
+              {/*</Grid>*/}
             </Fragment>
-          )}
+          )}{" "}
+          <Grid container ml={2}>
+            <IconButton onClick={handleClipboard} size={"small"}>
+              <FontAwesomeIcon icon={faLink} color="white" />
+            </IconButton>
+          </Grid>
         </Toolbar>
       </AppBar>
 

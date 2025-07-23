@@ -27,7 +27,7 @@ const ModDetailChart = ({
   mod: ModInterface;
   rawData: { [key: string]: Record<string, string> };
 }) => {
-  const years = Object.keys(rawData).filter((k) => k !== "overall");
+  let years = Object.keys(rawData).filter((k) => k !== "overall");
 
   const popularity = years
     .filter((year: string) => rawData[year][mod.name])
@@ -60,7 +60,10 @@ const ModDetailChart = ({
   return (
     <Box sx={{ width: "100%", height: 200, position: "relative" }}>
       <ResponsiveContainer width="100%" height={200}>
-        <AreaChart data={popularity} margin={{ top: 20, bottom: 0, right: 60 }}>
+        <AreaChart
+          data={popularity.length > 1 ? popularity : []}
+          margin={{ top: 20, bottom: 0, right: 60 }}
+        >
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="name" />
           <ReferenceLine y={0} stroke="#FFF" />
@@ -78,7 +81,7 @@ const ModDetailChart = ({
             stroke="#000"
             fill="url(#splitColor)"
           />
-          {popularity.length === 0 && (
+          {popularity.length < 2 && (
             <ReferenceDot x={0} y={0} r={0} isFront>
               <Label
                 value="No Data Available"
@@ -91,7 +94,7 @@ const ModDetailChart = ({
           )}
         </AreaChart>
       </ResponsiveContainer>{" "}
-      {popularity.length === 0 && (
+      {popularity.length < 2 && (
         <Box
           sx={{
             position: "absolute",

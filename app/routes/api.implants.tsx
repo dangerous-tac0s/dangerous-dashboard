@@ -5,7 +5,7 @@ import { json } from "@remix-run/node";
 import { CHIP_IMPLANT_MAP } from "~/models/chip_implant";
 import { MAGNET_IMPLANT_MAP } from "~/models/magnet_implant";
 
-export const loader = ({ request }) => {
+export const loader = ({ request }: { request: any }) => {
   const url = new URL(request.url);
   let active = url.searchParams.getAll("type");
   if (active.length === 0) {

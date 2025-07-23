@@ -1,4 +1,8 @@
-import { ChipImplantDetailsType } from "~/models/chip_implant";
+import {
+  CHIP_IMPLANT_MAP,
+  ChipImplantDetailsType,
+} from "~/models/chip_implant";
+import { MAGNET_IMPLANT_MAP } from "~/models/magnet_implant";
 
 export type ModType = "Magnet" | "Chip" | "Other Mod" | "xLED";
 
@@ -17,37 +21,73 @@ export interface SummaryLine {
   value: string;
 }
 
-export interface ModInterface {
+export interface ModMetadata {
+  /** e.g., "DT NExT" */
   name: string;
-  mod_type: string;
+  /** etc. for all boolean properties... */
+  mod_type: ModType;
+  /** "Injectable", "Needle", "Scalpel", or "Unknown" */
+  install_method?: string;
+  /** "flex", "x-series", "other", or "Unknown" */
+  description?: string;
+  first_offered?: number;
+  image_uri?: string;
+  product_url?: string;
+  discontinued?: number;
+  popularity?: number;
+}
+
+export interface ModInterface extends ModMetadata {
+  // name: string;
+  // mod_type: string;
   type: string;
   summary: SummaryLine[];
   details: ChipImplantDetailsType;
   features: { [key: string]: FeatureType };
-  install_method: string;
-  description: string | null | undefined;
-  first_offered: number | undefined | null;
+  // install_method: string;
+  // description?: string | null;
+  // first_offered?: number | null;
+  // image_uri?: string;
+  // product_url?: string;
 }
 
 export abstract class Mod implements ModInterface {
   readonly name: string;
-  readonly mod_type: string;
+  readonly mod_type: ModType;
   protected _features: { [key: string]: FeatureType };
   readonly install_method: string = "Unknown";
   readonly description: string | undefined;
-  readonly first_offered: number | undefined | null;
+  readonly first_offered: number | undefined;
+  readonly image_uri: string | undefined;
+  readonly product_url: string | undefined;
+  readonly discontinued: number | undefined;
+  readonly popularity: number | undefined;
 
   constructor(
     meta: ModMetadata,
     features: Partial<Record<string, FeatureType>> = {},
   ) {
-    const { name, mod_type, install_method, description, first_offered } = meta;
+    const {
+      name,
+      mod_type,
+      install_method,
+      description,
+      first_offered,
+      image_uri,
+      product_url,
+      discontinued,
+      popularity,
+    } = meta;
     this.name = name;
     this.mod_type = mod_type;
     this.install_method = install_method ?? "Unknown";
     this._features = features as Record<string, FeatureType>;
     this.description = description;
     this.first_offered = first_offered;
+    this.image_uri = image_uri;
+    this.product_url = product_url;
+    this.discontinued = discontinued;
+    this.popularity = popularity;
   }
 
   // Exists to be overridden
@@ -60,6 +100,7 @@ export abstract class Mod implements ModInterface {
   }
 
   get details(): ChipImplantDetailsType {
+    // @ts-expect-error exists to be overridden
     return {};
   }
 
@@ -76,18 +117,6 @@ export abstract class Mod implements ModInterface {
   public toString(): string {
     return this.name;
   }
-}
-
-export interface ModMetadata {
-  /** e.g., "DT NExT" */
-  name: string;
-  /** etc. for all boolean properties... */
-  mod_type: ModType;
-  /** "Injectable", "Needle", "Scalpel", or "Unknown" */
-  install_method?: string;
-  /** "flex", "x-series", "other", or "Unknown" */
-  description?: string;
-  first_offered?: number;
 }
 
 export function numberToLocalizedNumber(value: string) {
@@ -127,3 +156,6 @@ export function floatToLocalizedPercentage(value: number, decimals = 2) {
     maximumFractionDigits: decimals,
   }).format(value);
 }
+
+export const MODS_MAP = {};
+Object.assign(MODS_MAP, CHIP_IMPLANT_MAP);
